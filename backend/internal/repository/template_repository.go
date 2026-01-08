@@ -102,7 +102,6 @@ func (r *TemplateRepository) seedTemplates(ctx context.Context, force bool) erro
 			return nil
 		}
 	} else {
-		// Delete all existing templates when forcing reseed
 		_, _ = r.collection.DeleteMany(ctx, bson.M{})
 	}
 
