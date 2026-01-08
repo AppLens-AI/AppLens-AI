@@ -6,18 +6,8 @@ import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
 import DashboardPage from '@/pages/dashboard/DashboardPage'
 import TemplatesPage from '@/pages/templates/TemplatesPage'
-import EditorPage from '@/pages/editor/EditorPage'
+import { EditorPage } from '@/pages/editor/EditorPage'
 import ExportPage from '@/pages/export/ExportPage'
-
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthStore()
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
-  
-  return <>{children}</>
-}
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -54,13 +44,7 @@ export default function App() {
         </Route>
 
         {/* Protected routes */}
-        <Route
-          element={
-            // <ProtectedRoute>
-              <MainLayout />
-            // </ProtectedRoute>
-          }
-        >
+        <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/templates" element={<TemplatesPage />} />
           <Route path="/editor/:projectId" element={<EditorPage />} />
