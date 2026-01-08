@@ -22,6 +22,13 @@ type TemplateConfig struct {
 	Canvas  CanvasConfig  `bson:"canvas" json:"canvas"`
 	Layers  []LayerConfig `bson:"layers" json:"layers"`
 	Exports []ExportSize  `bson:"exports" json:"exports"`
+	Slides  []SlideConfig `bson:"slides,omitempty" json:"slides,omitempty"`
+}
+
+type SlideConfig struct {
+	ID     string        `bson:"id" json:"id"`
+	Canvas CanvasConfig  `bson:"canvas" json:"canvas"`
+	Layers []LayerConfig `bson:"layers" json:"layers"`
 }
 
 type CanvasConfig struct {
