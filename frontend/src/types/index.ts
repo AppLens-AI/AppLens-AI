@@ -17,6 +17,7 @@ export interface Template {
   platform: 'ios' | 'android' | 'both'
   category: string
   thumbnail: string
+  thumbnails?: string[]
   jsonConfig: TemplateConfig
   isActive: boolean
   createdAt: string

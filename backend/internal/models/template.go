@@ -12,6 +12,7 @@ type Template struct {
 	Platform   string             `bson:"platform" json:"platform"` // ios, android, both
 	Category   string             `bson:"category" json:"category"`
 	Thumbnail  string             `bson:"thumbnail" json:"thumbnail"`
+	Thumbnails []string           `bson:"thumbnails" json:"thumbnails"` // Multiple preview images
 	JSONConfig TemplateConfig     `bson:"jsonConfig" json:"jsonConfig"`
 	IsActive   bool               `bson:"isActive" json:"isActive"`
 	CreatedAt  time.Time          `bson:"createdAt" json:"createdAt"`
