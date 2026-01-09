@@ -44,7 +44,7 @@ export default function LoginPage() {
     <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-8 lg:gap-16 items-center animate-blur-in px-4">
       <div className="flex-1 max-w-lg lg:max-w-none">
         <div className="flex items-center gap-3 mb-8 animate-slide-up opacity-0 stagger-1" style={{ animationFillMode: 'forwards' }}>
-          <div className="w-12 h-12 bg-gradient-to-br from-black to-indigo-900 rounded-xl flex items-center justify-center shadow-lg shadow-black-500/25">
+          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
             <svg
               className="w-7 h-7 text-white"
               fill="none"
@@ -61,7 +61,7 @@ export default function LoginPage() {
         <div className="animate-slide-up opacity-0 stagger-2" style={{ animationFillMode: 'forwards' }}>
           <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-4">
             Transform your<br />
-            <span className="gradient-text-animated">screenshots</span><br />
+            <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">screenshots</span><br />
             into art
           </h1>
           <p className="text-lg text-gray-600 mb-8 max-w-md">
@@ -77,8 +77,8 @@ export default function LoginPage() {
               className="flex items-center gap-3 text-gray-700 group"
               style={{ animationDelay: `${0.3 + index * 0.05}s` }}
             >
-              <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors">
-                <Check className="w-3.5 h-3.5 text-green-600" />
+              <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                <Check className="w-3.5 h-3.5 text-emerald-600" />
               </div>
               <span className="font-medium">{feature}</span>
             </div>
@@ -106,7 +106,7 @@ export default function LoginPage() {
 
       {/* Right side - Login form */}
       <div className="w-full max-w-md">
-        <div className="glass-card p-8 lg:p-10">
+        <div className="glass-card p-8 lg:p-10 hover:shadow-xl transition-shadow duration-300">
           {/* Header */}
           <div className="text-center mb-8 animate-slide-up opacity-0 stagger-1" style={{ animationFillMode: 'forwards' }}>
             <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h2>
@@ -128,7 +128,7 @@ export default function LoginPage() {
             <button
               type="button"
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white
-                         hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group shadow-sm"
+                         hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-200 group shadow-sm"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -153,7 +153,7 @@ export default function LoginPage() {
             <button
               type="button"
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white
-                         hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 group shadow-sm"
+                         hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-200 group shadow-sm"
             >
               <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
                 <path
@@ -187,7 +187,7 @@ export default function LoginPage() {
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400
-                           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+                           focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20
                            transition-all duration-200 shadow-sm"
                 placeholder="you@example.com"
               />
@@ -200,7 +200,7 @@ export default function LoginPage() {
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+                  className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
                 >
                   Forgot?
                 </Link>
@@ -214,7 +214,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   className="w-full px-4 py-3 pr-12 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400
-                             focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
+                             focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20
                              transition-all duration-200 shadow-sm"
                   placeholder="••••••••"
                 />
@@ -231,22 +231,22 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-gray-900 text-white font-semibold rounded-xl
-                         hover:bg-gray-800 active:scale-[0.98]
+              className="w-full py-3.5 bg-emerald-500 text-white font-semibold rounded-xl
+                         hover:bg-emerald-600 active:scale-[0.98]
                          transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2 group shadow-lg shadow-gray-900/10
+                         flex items-center justify-center gap-2 group shadow-lg shadow-emerald-500/25
                          animate-slide-up opacity-0 stagger-4"
               style={{ animationFillMode: 'forwards' }}
             >
               {isLoading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Signing in...
+                  <span>Signing in...</span>
                 </>
               ) : (
                 <>
-                  Sign in
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  <span>Sign in</span>
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
                 </>
               )}
             </button>
@@ -257,7 +257,7 @@ export default function LoginPage() {
             Don't have an account?{' '}
             <Link
               to="/register"
-              className="font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+              className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
             >
               Sign up for free
             </Link>
