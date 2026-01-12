@@ -1,207 +1,73 @@
-# Shotify - App Store Screenshot Generator
+# Welcome to your Lovable project
 
-A modern, minimal, dark-themed web platform to generate App Store and Play Store screenshots. Built with Go backend and React frontend.
+## Project info
 
-![Shotify](https://via.placeholder.com/1200x630/0B0B0B/3B82F6?text=Shotify)
+**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
-## Features
+## How can I edit this code?
 
-- 🎨 **Modern Dark Theme** - Professional, developer-focused UI
-- 📱 **Multi-Platform Support** - iOS App Store & Google Play screenshots
-- 🖼️ **Visual Editor** - Drag, resize, and customize layers
-- 📦 **Batch Export** - Export multiple sizes as ZIP
-- 🔄 **Real-time Preview** - See changes instantly
-- 💾 **Cloud Storage** - Images stored on S3
-- 🔐 **JWT Authentication** - Secure user accounts
+There are several ways of editing your application.
 
-## Tech Stack
+**Use Lovable**
 
-### Backend
-- Go 1.21+
-- Gin Framework
-- MongoDB
-- AWS S3 / MinIO
-- JWT Authentication
+Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
 
-### Frontend
-- React 18 + Vite
-- TypeScript
-- Konva.js (Canvas Editor)
-- Zustand (State Management)
-- TailwindCSS
-- JSZip + FileSaver
+Changes made via Lovable will be committed automatically to this repo.
 
-## Project Structure
+**Use your preferred IDE**
 
-```
-shotify/
-├── backend/
-│   ├── cmd/
-│   │   └── main.go
-│   ├── internal/
-│   │   ├── config/
-│   │   ├── handler/
-│   │   ├── middleware/
-│   │   ├── models/
-│   │   ├── repository/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   └── utils/
-│   ├── pkg/
-│   │   ├── database/
-│   │   ├── logger/
-│   │   └── storage/
-│   ├── go.mod
-│   ├── go.sum
-│   ├── Makefile
-│   └── .env.example
-│
-└── frontend/
-    ├── src/
-    │   ├── components/
-    │   ├── layouts/
-    │   ├── lib/
-    │   ├── pages/
-    │   ├── stores/
-    │   ├── styles/
-    │   └── types/
-    ├── package.json
-    └── vite.config.ts
-```
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-## Getting Started
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-### Prerequisites
+Follow these steps:
 
-- Go 1.21+
-- Node.js 18+
-- MongoDB
-- AWS S3 bucket (or MinIO for local development)
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-### Backend Setup
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
 
-```bash
-cd backend
+# Step 3: Install the necessary dependencies.
+npm i
 
-# Copy environment file
-cp .env.example .env
-
-# Edit .env with your configuration
-# - MONGO_URI
-# - JWT_SECRET
-# - AWS credentials
-
-# Install dependencies
-go mod download
-
-# Run the server
-make run
-```
-
-### Frontend Setup
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Run development server
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-### Environment Variables
+**Edit a file directly in GitHub**
 
-#### Backend (.env)
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-```env
-PORT=8080
-ENVIRONMENT=development
-MONGO_URI=mongodb://localhost:27017
-DATABASE_NAME=shotify
-JWT_SECRET=your-super-secret-jwt-key-min-32-chars
-AWS_REGION=us-east-1
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
-AWS_S3_BUCKET=shotify-uploads
-# For MinIO (local development)
-# AWS_ENDPOINT=http://localhost:9000
-ALLOWED_ORIGINS=http://localhost:5173
-```
+**Use GitHub Codespaces**
 
-#### Frontend (.env)
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-```env
-VITE_API_URL=/api
-```
+## What technologies are used for this project?
 
-## API Endpoints
+This project is built with:
 
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-### Templates
-- `GET /api/get-templates` - Get all templates
-- `GET /api/get-template-byId/:id` - Get template by ID
+## How can I deploy this project?
 
-### Projects (Protected)
-- `POST /api/create-project` - Create new project
-- `GET /api/get-projects` - Get user's projects
-- `GET /api/get-project-byId/:id` - Get project by ID
-- `PUT /api/update-project/:id` - Update project
-- `DELETE /api/delete-projects/:id` - Delete project
+Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
 
-### Uploads (Protected)
-- `POST /api/uploads/image` - Upload image to S3
+## Can I connect a custom domain to my Lovable project?
 
-## Design System
+Yes, you can!
 
-### Colors
-- Background: `#0B0B0B`
-- Surface: `#111111`
-- Border: `#1F1F1F`
-- Text Primary: `#FFFFFF`
-- Text Secondary: `#B3B3B3`
-- Accent Blue: `#3B82F6`
-- Accent Green: `#22C55E`
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-### Typography
-- Font: Inter
-- Headings: Semi-bold (600)
-- Body: Regular (400)
-- Buttons: Medium (500)
-
-## Development
-
-### Running with MinIO (Local S3)
-
-```bash
-# Start MinIO
-docker run -p 9000:9000 -p 9001:9001 \
-  -e MINIO_ROOT_USER=minioadmin \
-  -e MINIO_ROOT_PASSWORD=minioadmin \
-  minio/minio server /data --console-address ":9001"
-
-# Create bucket via MinIO Console (http://localhost:9001)
-# Update backend .env:
-# AWS_ENDPOINT=http://localhost:9000
-# AWS_ACCESS_KEY_ID=minioadmin
-# AWS_SECRET_ACCESS_KEY=minioadmin
-```
-
-### Building for Production
-
-```bash
-# Backend
-cd backend
-make build-prod
-
-# Frontend
-cd frontend
-npm run build
-```
-
-## License
-
-MIT License
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
