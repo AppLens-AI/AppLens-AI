@@ -1,14 +1,21 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { useAuthStore } from '@/stores/authStore'
-import AuthLayout from '@/layouts/AuthLayout'
-import MainLayout from '@/layouts/MainLayout'
-import LoginPage from '@/pages/auth/LoginPage'
-import RegisterPage from '@/pages/auth/RegisterPage'
-import DashboardPage from '@/pages/dashboard/DashboardPage'
-import TemplatesPage from '@/pages/templates/TemplatesPage'
-import { EditorPage } from '@/pages/editor/EditorPage'
-import ExportPage from '@/pages/export/ExportPage'
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import Index from "./pages/Index";
+import NotFound from "./pages/NotFound";
+import { useAuthStore } from "./stores/authStore";
+import AuthLayout from "./components/layouts/AuthLayout";
+import MainLayout from "./components/layouts/MainLayout";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import DashboardPage from "./pages/dashboard/DashboardPage";
+import TemplatesPage from "./pages/templates/TemplatesPage";
+import { EditorPage } from "./pages/editor/EditorPage";
+import ExportPage from "./pages/export/ExportPage";
 
+const queryClient = new QueryClient();
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
   if (!isAuthenticated) {
@@ -26,12 +33,18 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   
   return <>{children}</>
 }
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
 
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route element={<AuthLayout />}>
+          <Route element={<AuthLayout />}>
           <Route
             path="/login"
             element={
@@ -49,17 +62,27 @@ export default function App() {
             }
           />
         </Route>
+          {/* </Route> */}
 
-        <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/templates" element={<TemplatesPage />} />
-          <Route path="/editor/:projectId" element={<EditorPage />} />
-          <Route path="/export/:projectId" element={<ExportPage />} />
-        </Route>
+          <Route
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/templates" element={<TemplatesPage />} />
+            <Route path="/editor/:projectId" element={<EditorPage />} />
+            <Route path="/export/:projectId" element={<ExportPage />} />
+          </Route>
 
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </BrowserRouter>
-  )
-}
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
+
+export default App;

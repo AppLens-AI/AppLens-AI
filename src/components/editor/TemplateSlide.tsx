@@ -172,13 +172,13 @@ export default function TemplateSlide({ slide, isActive, onClick }: TemplateSlid
                 />
                 {isLoading && (
                   <div 
-                    className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
+                    className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
                     style={{ borderRadius: `${borderRadius}px` }}
                   >
                     <div className="relative">
-                      <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
-                      <div className="relative bg-white/90 backdrop-blur-sm p-4 rounded-full shadow-2xl">
-                        <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                      <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+                      <div className="relative bg-card/90 backdrop-blur-sm p-4 rounded-full shadow-2xl">
+                        <Loader2 className="w-8 h-8 text-primary animate-spin" />
                       </div>
                     </div>
                   </div>
@@ -186,7 +186,7 @@ export default function TemplateSlide({ slide, isActive, onClick }: TemplateSlid
               </div>
             ) : (
               <div 
-                className="w-full h-full bg-gradient-to-br from-slate-200 to-slate-300 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-slate-400/50 relative"
+                className="w-full h-full bg-gradient-to-br from-secondary to-muted flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border relative"
                 style={{ borderRadius: `${borderRadius}px` }}
                 onClick={(e) => {
                   e.stopPropagation()
@@ -199,25 +199,25 @@ export default function TemplateSlide({ slide, isActive, onClick }: TemplateSlid
                 {isLoading ? (
                   <div className="flex flex-col items-center justify-center gap-4">
                     <div className="relative">
-                      <div className="absolute inset-0 bg-emerald-500/20 rounded-full animate-ping" />
-                      <div className="relative bg-white/90 backdrop-blur-sm p-4 rounded-full shadow-2xl">
-                        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+                      <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+                      <div className="relative bg-card/90 backdrop-blur-sm p-4 rounded-full shadow-2xl">
+                        <Loader2 className="w-10 h-10 text-primary animate-spin" />
                       </div>
                     </div>
-                    <span className="text-sm text-slate-600 font-medium animate-pulse">
+                    <span className="text-sm text-muted-foreground font-medium animate-pulse">
                       Uploading...
                     </span>
                   </div>
                 ) : (
                   <>
-                    <div className="p-4 bg-white/50 rounded-full">
+                    <div className="p-4 bg-card/50 rounded-full">
                       {layer.type === 'screenshot' ? (
-                        <Smartphone className="w-10 h-10 text-slate-500" />
+                        <Smartphone className="w-10 h-10 text-muted-foreground" />
                       ) : (
-                        <ImagePlus className="w-10 h-10 text-slate-500" />
+                        <ImagePlus className="w-10 h-10 text-muted-foreground" />
                       )}
                     </div>
-                    <span className="text-sm text-slate-600 font-medium">
+                    <span className="text-sm text-muted-foreground font-medium">
                       {props.placeholder || 'Click to add image'}
                     </span>
                   </>

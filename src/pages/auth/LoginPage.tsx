@@ -44,91 +44,75 @@ export default function LoginPage() {
     <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-8 lg:gap-16 items-center animate-blur-in px-4">
       <div className="flex-1 max-w-lg lg:max-w-none">
         <div className="flex items-center gap-3 mb-8 animate-slide-up opacity-0 stagger-1" style={{ animationFillMode: 'forwards' }}>
-          <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/25">
-            <svg
-              className="w-7 h-7 text-white"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="3" strokeWidth="2" />
-              <rect x="7" y="7" width="10" height="10" rx="1" fill="currentColor" />
-            </svg>
-          </div>
-          <span className="text-2xl font-bold text-gray-900">Shotify</span>
+          <img src="/logo.png" alt="Logo" className="w-20 h-20 hidden sm:block" style={{marginLeft: -20, marginRight: -14}}/>
+          <span className="text-3xl font-bold text-foreground">Shotify</span>
         </div>
 
         <div className="animate-slide-up opacity-0 stagger-2" style={{ animationFillMode: 'forwards' }}>
-          <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight mb-4">
+          <h1 className="text-3xl lg:text-4xl font-bold text-foreground leading-tight mb-4">
             Transform your<br />
-            <span className="bg-gradient-to-r from-emerald-600 to-emerald-500 bg-clip-text text-transparent">screenshots</span><br />
+            <span className="bg-gradient-to-r from-emerald-400 to-emerald-500 bg-clip-text text-transparent">screenshots</span><br />
             into art
           </h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-md">
+          <p className="text-lg text-muted-foreground mb-8 max-w-md">
             Join thousands of creators who use Shotify to create beautiful, share-ready images in seconds.
           </p>
         </div>
 
-        {/* Feature list */}
         <div className="space-y-3 animate-slide-up opacity-0 stagger-3" style={{ animationFillMode: 'forwards' }}>
           {features.map((feature, index) => (
             <div 
               key={feature} 
-              className="flex items-center gap-3 text-gray-700 group"
+              className="flex items-center gap-3 text-foreground group"
               style={{ animationDelay: `${0.3 + index * 0.05}s` }}
             >
-              <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
-                <Check className="w-3.5 h-3.5 text-emerald-600" />
+              <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center group-hover:bg-primary/30 transition-colors">
+                <Check className="w-3.5 h-3.5 text-primary" />
               </div>
               <span className="font-medium">{feature}</span>
             </div>
           ))}
         </div>
 
-        {/* Social proof */}
         <div className="mt-10 flex items-center gap-4 animate-slide-up opacity-0 stagger-4" style={{ animationFillMode: 'forwards' }}>
           <div className="flex -space-x-3">
             {[...Array(4)].map((_, i) => (
               <div 
                 key={i} 
-                className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 border-2 border-white flex items-center justify-center text-sm font-medium text-gray-500"
+                className="w-10 h-10 rounded-full bg-gradient-to-br from-secondary to-muted border-2 border-card flex items-center justify-center text-sm font-medium text-muted-foreground"
               >
                 {String.fromCharCode(65 + i)}
               </div>
             ))}
           </div>
           <div className="text-sm">
-            <p className="font-semibold text-gray-900">2,000+ creators</p>
-            <p className="text-gray-500">already using Shotify</p>
+            <p className="font-semibold text-foreground">2,000+ creators</p>
+            <p className="text-muted-foreground">already using Shotify</p>
           </div>
         </div>
       </div>
 
-      {/* Right side - Login form */}
       <div className="w-full max-w-md">
         <div className="glass-card p-8 lg:p-10 hover:shadow-xl transition-shadow duration-300">
-          {/* Header */}
           <div className="text-center mb-8 animate-slide-up opacity-0 stagger-1" style={{ animationFillMode: 'forwards' }}>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Welcome back</h2>
-            <p className="text-gray-600">Sign in to your account to continue</p>
+            <h2 className="text-2xl font-bold text-foreground mb-2">Welcome back</h2>
+            <p className="text-muted-foreground">Sign in to your account to continue</p>
           </div>
 
-          {/* Error message */}
           {error && (
-            <div className="mb-6 px-4 py-3 bg-red-50 border border-red-200 rounded-xl animate-scale-in">
-              <p className="text-sm text-red-600 flex items-center gap-2">
-                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+            <div className="mb-6 px-4 py-3 bg-destructive/10 border border-destructive/30 rounded-xl animate-scale-in">
+              <p className="text-sm text-destructive flex items-center gap-2">
+                <span className="w-2 h-2 bg-destructive rounded-full animate-pulse" />
                 {error}
               </p>
             </div>
           )}
 
-          {/* Social login buttons */}
           <div className="grid grid-cols-2 gap-3 mb-6 animate-slide-up opacity-0 stagger-2" style={{ animationFillMode: 'forwards' }}>
             <button
               type="button"
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white
-                         hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-200 group shadow-sm"
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-border bg-card
+                         hover:bg-secondary hover:border-primary/30 transition-all duration-200 group shadow-sm"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path
@@ -148,35 +132,33 @@ export default function LoginPage() {
                   fill="#EA4335"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-700">Google</span>
+              <span className="text-sm font-medium text-foreground">Google</span>
             </button>
             <button
               type="button"
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-gray-200 bg-white
-                         hover:bg-emerald-50 hover:border-emerald-300 transition-all duration-200 group shadow-sm"
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-border bg-card
+                         hover:bg-secondary hover:border-primary/30 transition-all duration-200 group shadow-sm"
             >
-              <svg className="w-5 h-5 text-gray-900" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-foreground" fill="currentColor" viewBox="0 0 24 24">
                 <path
                   fillRule="evenodd"
                   d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="text-sm font-medium text-gray-700">GitHub</span>
+              <span className="text-sm font-medium text-foreground">GitHub</span>
             </button>
           </div>
 
-          {/* Divider */}
           <div className="flex items-center gap-4 mb-6 animate-slide-up opacity-0 stagger-2" style={{ animationFillMode: 'forwards' }}>
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-gray-400 text-sm">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
+            <div className="flex-1 h-px bg-border" />
+            <span className="text-muted-foreground text-sm">or</span>
+            <div className="flex-1 h-px bg-border" />
           </div>
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="animate-slide-up opacity-0 stagger-3" style={{ animationFillMode: 'forwards' }}>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
                 Email address
               </label>
               <input
@@ -186,8 +168,8 @@ export default function LoginPage() {
                 autoComplete="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400
-                           focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20
+                className="w-full px-4 py-3 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground
+                           focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
                            transition-all duration-200 shadow-sm"
                 placeholder="you@example.com"
               />
@@ -195,12 +177,12 @@ export default function LoginPage() {
 
             <div className="animate-slide-up opacity-0 stagger-3" style={{ animationFillMode: 'forwards' }}>
               <div className="flex justify-between items-center mb-2">
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="password" className="block text-sm font-medium text-foreground">
                   Password
                 </label>
                 <Link
                   to="/forgot-password"
-                  className="text-sm text-emerald-600 hover:text-emerald-700 font-medium transition-colors"
+                  className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
                 >
                   Forgot?
                 </Link>
@@ -213,15 +195,15 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 bg-white border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400
-                             focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20
+                  className="w-full px-4 py-3 pr-12 bg-secondary border border-border rounded-xl text-foreground placeholder:text-muted-foreground
+                             focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20
                              transition-all duration-200 shadow-sm"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
@@ -231,10 +213,10 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3.5 bg-emerald-500 text-white font-semibold rounded-xl
-                         hover:bg-emerald-600 active:scale-[0.98]
+              className="w-full py-3.5 bg-primary text-primary-foreground font-semibold rounded-xl
+                         hover:bg-primary/90 active:scale-[0.98]
                          transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed
-                         flex items-center justify-center gap-2 group shadow-lg shadow-emerald-500/25
+                         flex items-center justify-center gap-2 group shadow-lg shadow-primary/25
                          animate-slide-up opacity-0 stagger-4"
               style={{ animationFillMode: 'forwards' }}
             >
@@ -252,20 +234,18 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Footer */}
-          <p className="mt-6 text-center text-sm text-gray-600 animate-slide-up opacity-0 stagger-5" style={{ animationFillMode: 'forwards' }}>
+          <p className="mt-6 text-center text-sm text-muted-foreground animate-slide-up opacity-0 stagger-5" style={{ animationFillMode: 'forwards' }}>
             Don't have an account?{' '}
             <Link
               to="/register"
-              className="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+              className="font-semibold text-primary hover:text-primary/80 transition-colors"
             >
               Sign up for free
             </Link>
           </p>
         </div>
 
-        {/* Trust badges */}
-        <div className="mt-6 flex items-center justify-center gap-6 text-gray-400 text-xs animate-slide-up opacity-0 stagger-5" style={{ animationFillMode: 'forwards' }}>
+        <div className="mt-6 flex items-center justify-center gap-6 text-muted-foreground text-xs animate-slide-up opacity-0 stagger-5" style={{ animationFillMode: 'forwards' }}>
           <div className="flex items-center gap-1.5">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
