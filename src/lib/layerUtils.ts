@@ -176,7 +176,8 @@ export function calculateLayerStyle(
       break;
     case "center":
     default:
-      top = `${(layer.y / canvas.height) * 100}%`;
+      // Use offsetY as absolute position from top
+      top = `${(offsetY / canvas.height) * 100}%`;
       translateY = "-50%";
       break;
   }
