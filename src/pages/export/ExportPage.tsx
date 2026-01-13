@@ -168,7 +168,6 @@ export default function ExportPage() {
         break
       case 'center':
       default:
-        // Use offsetY as absolute position from top
         y = offsetY * scaleY
         if (layer.type !== 'text') y -= height / 2
         break
@@ -655,7 +654,6 @@ export default function ExportPage() {
         </div>
       </div>
 
-      {/* Toast */}
       {exportComplete && (
         <div className="fixed bottom-8 right-8">
           <div className="flex items-center gap-3 px-5 py-4 bg-card border border-border rounded-2xl shadow-2xl">
