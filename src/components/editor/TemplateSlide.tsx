@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { LayerConfig, TextProperties, ImageProperties, ShapeProperties } from '@/types'
 import { useEditorStore } from '@/stores/editorStore'
 import { uploadApi } from '@/lib/api'
@@ -267,6 +267,12 @@ export default function TemplateSlide({ slide, isActive, onClick }: TemplateSlid
 
   const sortedLayers = [...slide.layers].sort((a, b) => a.zIndex - b.zIndex)
   const backgroundColor = slide.canvas.backgroundColor
+
+  useEffect(() => {
+    if (containerRef.current) {
+      setLoadingLayers(new Set(loadingLayers));
+    }
+  }, [containerRef.current]);
 
   return (
     <div 
