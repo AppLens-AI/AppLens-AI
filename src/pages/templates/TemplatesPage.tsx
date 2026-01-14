@@ -1,85 +1,115 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { templatesApi, projectsApi } from '@/lib/api'
-import type { Template } from '@/types'
-import { 
-  Loader2, 
-  Apple, 
-  Smartphone, 
-  Layers, 
-  ArrowRight, 
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { templatesApi, projectsApi } from "@/lib/api";
+import type { Template } from "@/types";
+import {
+  Loader2,
+  Apple,
+  Smartphone,
+  Layers,
+  ArrowRight,
   LayoutTemplate,
   X,
   Check,
   ChevronLeft,
   ChevronRight,
-} from 'lucide-react'
+} from "lucide-react";
 
-type PlatformFilter = 'all' | 'ios' | 'android'
+type PlatformFilter = "all" | "ios" | "android";
 
 export default function TemplatesPage() {
-  const navigate = useNavigate()
-  const [templates, setTemplates] = useState<Template[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [filter, setFilter] = useState<PlatformFilter>('all')
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null)
-  const [projectName, setProjectName] = useState('')
-  const [isCreating, setIsCreating] = useState(false)
+  const navigate = useNavigate();
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState<PlatformFilter>("all");
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
+  const [projectName, setProjectName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
-    fetchTemplates()
-  }, [filter])
+    fetchTemplates();
+  }, [filter]);
 
   const fetchTemplates = async () => {
     try {
-      const response = await templatesApi.getAll(filter === 'all' ? undefined : filter)
-      setTemplates(response.data.data || [])
+      const response = await templatesApi.getAll(
+        filter === "all" ? undefined : filter
+      );
+      setTemplates(response.data.data || []);
     } catch (error) {
-      console.error('Failed to fetch templates:', error)
+      console.error("Failed to fetch templates:", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleCreateProject = async () => {
-    if (!selectedTemplate || !projectName.trim()) return
+    if (!selectedTemplate || !projectName.trim()) return;
 
-    setIsCreating(true)
+    setIsCreating(true);
     try {
       const response = await projectsApi.create({
         templateId: selectedTemplate.id,
         name: projectName.trim(),
-      })
-      navigate(`/editor/${response.data.data.id}`)
+      });
+      navigate(`/editor/${response.data.data.id}`);
     } catch (error) {
-      console.error('Failed to create project:', error)
+      console.error("Failed to create project:", error);
     } finally {
-      setIsCreating(false)
+      setIsCreating(false);
     }
-  }
+  };
 
-  const platformFilters: { value: PlatformFilter; label: string; icon: React.ReactNode; color: string }[] = [
-    { value: 'all', label: 'All Templates', icon: <Layers className="w-4 h-4" />, color: 'slate' },
-    { value: 'ios', label: 'iOS', icon: <Apple className="w-4 h-4" />, color: 'blue' },
-    { value: 'android', label: 'Android', icon: <Smartphone className="w-4 h-4" />, color: 'emerald' },
-  ]
+  const platformFilters: {
+    value: PlatformFilter;
+    label: string;
+    icon: React.ReactNode;
+    color: string;
+  }[] = [
+    {
+      value: "all",
+      label: "All Templates",
+      icon: <Layers className="w-4 h-4" />,
+      color: "slate",
+    },
+    {
+      value: "ios",
+      label: "iOS",
+      icon: <Apple className="w-4 h-4" />,
+      color: "blue",
+    },
+    {
+      value: "android",
+      label: "Android",
+      icon: <Smartphone className="w-4 h-4" />,
+      color: "emerald",
+    },
+  ];
 
-  const scrollContainer = (id: string, direction: 'left' | 'right') => {
-    const container = document.getElementById(id)
+  const scrollContainer = (id: string, direction: "left" | "right") => {
+    const container = document.getElementById(id);
     if (container) {
-      const scrollAmount = 300
+      const scrollAmount = 300;
       container.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      })
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-background">
       {/* Hero glow effect */}
-      <div className="fixed inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(160 84% 39% / 0.15), transparent)' }} />
-      
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 80% 50% at 50% -20%, hsl(160 84% 39% / 0.15), transparent)",
+        }}
+      />
+
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
@@ -97,9 +127,10 @@ export default function TemplatesPage() {
               onClick={() => setFilter(value)}
               className={`
                 flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all
-                ${filter === value
-                  ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/25'
-                  : 'bg-card text-muted-foreground border border-border hover:border-primary/50 hover:text-foreground'
+                ${
+                  filter === value
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+                    : "bg-card text-muted-foreground border border-border hover:border-primary/50 hover:text-foreground"
                 }
               `}
             >
@@ -117,8 +148,12 @@ export default function TemplatesPage() {
         ) : templates.length === 0 ? (
           <div className="bg-card border border-border rounded-xl p-12 text-center">
             <LayoutTemplate className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-xl font-semibold text-foreground mb-2">No templates found</h3>
-            <p className="text-muted-foreground">Try changing the filter to see more templates</p>
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              No templates found
+            </h3>
+            <p className="text-muted-foreground">
+              Try changing the filter to see more templates
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -126,16 +161,17 @@ export default function TemplatesPage() {
               <div
                 key={template.id}
                 onClick={() => {
-                  setSelectedTemplate(template)
-                  setProjectName(`${template.name} Project`)
+                  setSelectedTemplate(template);
+                  setProjectName(`${template.name} Project`);
                 }}
                 className={`
                   group relative bg-card border rounded-2xl overflow-hidden cursor-pointer 
                   transition-all duration-200
                   hover:shadow-xl hover:shadow-primary/10 hover:border-primary/50
-                  ${selectedTemplate?.id === template.id
-                    ? 'border-primary ring-2 ring-primary/50 shadow-lg shadow-primary/20'
-                    : 'border-border'
+                  ${
+                    selectedTemplate?.id === template.id
+                      ? "border-primary ring-2 ring-primary/50 shadow-lg shadow-primary/20"
+                      : "border-border"
                   }
                 `}
               >
@@ -158,8 +194,8 @@ export default function TemplatesPage() {
                         <>
                           <button
                             onClick={(e) => {
-                              e.stopPropagation()
-                              scrollContainer(`scroll-${template.id}`, 'left')
+                              e.stopPropagation();
+                              scrollContainer(`scroll-${template.id}`, "left");
                             }}
                             className="absolute left-7 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-card/90 backdrop-blur-sm border border-border rounded-full shadow-lg opacity-0 group-hover/scroll:opacity-100 hover:bg-card transition-all"
                           >
@@ -167,8 +203,8 @@ export default function TemplatesPage() {
                           </button>
                           <button
                             onClick={(e) => {
-                              e.stopPropagation()
-                              scrollContainer(`scroll-${template.id}`, 'right')
+                              e.stopPropagation();
+                              scrollContainer(`scroll-${template.id}`, "right");
                             }}
                             className="absolute right-7 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-card/90 backdrop-blur-sm border border-border rounded-full shadow-lg opacity-0 group-hover/scroll:opacity-100 hover:bg-card transition-all"
                           >
@@ -180,10 +216,10 @@ export default function TemplatesPage() {
                       <div
                         id={`scroll-${template.id}`}
                         className="flex gap-3 overflow-x-auto scroll-smooth pb-2"
-                        style={{ 
-                          scrollbarWidth: 'none',
-                          msOverflowStyle: 'none',
-                          WebkitOverflowScrolling: 'touch'
+                        style={{
+                          scrollbarWidth: "none",
+                          msOverflowStyle: "none",
+                          WebkitOverflowScrolling: "touch",
                         }}
                         onMouseDown={(e) => e.stopPropagation()}
                       >
@@ -201,18 +237,21 @@ export default function TemplatesPage() {
                           </div>
                         ))}
                       </div>
-
-                      
                     </div>
                   ) : (
-                    <div 
+                    <div
                       className="relative aspect-[16/9] rounded-xl overflow-hidden border border-border shadow-lg"
-                      style={{ backgroundColor: template.jsonConfig.canvas.backgroundColor }}
+                      style={{
+                        backgroundColor:
+                          template.jsonConfig.canvas.backgroundColor,
+                      }}
                     >
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-secondary to-muted">
                         <div className="text-center">
                           <LayoutTemplate className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-                          <p className="text-sm text-muted-foreground">No Preview</p>
+                          <p className="text-sm text-muted-foreground">
+                            No Preview
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -225,12 +264,12 @@ export default function TemplatesPage() {
       </div>
 
       {selectedTemplate && (
-        <div 
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" 
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => setSelectedTemplate(null)}
         >
-          <div 
-            className="relative bg-card border border-border rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden" 
+          <div
+            className="relative bg-card border border-border rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -241,12 +280,19 @@ export default function TemplatesPage() {
             </button>
 
             <div className="p-6">
-              <h2 className="text-2xl font-bold text-foreground mb-2">Create New Project</h2>
-              <p className="text-muted-foreground mb-6">Using template: {selectedTemplate.name}</p>
+              <h2 className="text-2xl font-bold text-foreground mb-2">
+                Create New Project
+              </h2>
+              <p className="text-muted-foreground mb-6">
+                Using template: {selectedTemplate.name}
+              </p>
 
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="projectName" className="block text-sm font-medium text-foreground mb-2">
+                  <label
+                    htmlFor="projectName"
+                    className="block text-sm font-medium text-foreground mb-2"
+                  >
                     Project Name
                   </label>
                   <input
@@ -261,17 +307,26 @@ export default function TemplatesPage() {
                 </div>
 
                 <div className="flex items-center gap-2 p-3 bg-secondary rounded-lg border border-border">
-                  <span className={`
+                  <span
+                    className={`
                     inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium
-                    ${selectedTemplate.platform === 'ios' 
-                      ? 'bg-blue-500/20 text-blue-400' 
-                      : selectedTemplate.platform === 'android' 
-                        ? 'bg-primary/20 text-primary' 
-                        : 'bg-purple-500/20 text-purple-400'
+                    ${
+                      selectedTemplate.platform === "ios"
+                        ? "bg-blue-500/20 text-blue-400"
+                        : selectedTemplate.platform === "android"
+                        ? "bg-primary/20 text-primary"
+                        : "bg-purple-500/20 text-purple-400"
                     }
-                  `}>
-                    {selectedTemplate.platform === 'ios' ? <Apple className="w-3 h-3" /> : <Smartphone className="w-3 h-3" />}
-                    {selectedTemplate.platform === 'both' ? 'iOS & Android' : selectedTemplate.platform.toUpperCase()}
+                  `}
+                  >
+                    {selectedTemplate.platform === "ios" ? (
+                      <Apple className="w-3 h-3" />
+                    ) : (
+                      <Smartphone className="w-3 h-3" />
+                    )}
+                    {selectedTemplate.platform === "both"
+                      ? "iOS & Android"
+                      : selectedTemplate.platform.toUpperCase()}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     {selectedTemplate.jsonConfig.slides?.length || 0} Slides
@@ -309,5 +364,5 @@ export default function TemplatesPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
