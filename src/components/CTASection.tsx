@@ -1,30 +1,37 @@
-import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useSpring,
+  useTransform,
+} from "framer-motion";
 import { useRef } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
-const FloatingShape = ({ 
-  className, 
-  size, 
+const FloatingShape = ({
+  className,
+  size,
   delay,
-  duration = 20
-}: { 
-  className?: string; 
+  duration = 20,
+}: {
+  className?: string;
   size: number;
   delay: number;
   duration?: number;
 }) => (
   <motion.div
     initial={{ opacity: 0, scale: 0 }}
-    animate={{ 
+    animate={{
       opacity: 0.3,
       scale: 1,
       rotate: 360,
     }}
-    transition={{ 
+    transition={{
       opacity: { delay, duration: 1 },
       scale: { delay, duration: 1 },
-      rotate: { duration, repeat: Infinity, ease: "linear" }
+      rotate: { duration, repeat: Infinity, ease: "linear" },
     }}
     className={className}
     style={{ width: size, height: size }}
@@ -35,13 +42,14 @@ const CTASection = () => {
   const ref = useRef(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  
+  const navigate = useNavigate();
+
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-  
+
   const springX = useSpring(mouseX, { stiffness: 20, damping: 30 });
   const springY = useSpring(mouseY, { stiffness: 20, damping: 30 });
-  
+
   const x1 = useTransform(springX, [-500, 500], [-30, 30]);
   const y1 = useTransform(springY, [-500, 500], [-30, 30]);
   const x2 = useTransform(springX, [-500, 500], [20, -20]);
@@ -55,58 +63,69 @@ const CTASection = () => {
     mouseX.set(e.clientX - centerX);
     mouseY.set(e.clientY - centerY);
   };
-
+  function handleOnClick() {
+    navigate("/login");
+  }
   return (
-    <section 
-      ref={ref}
-      className="py-32 px-4 relative overflow-hidden"
-    >
-      <motion.div 
+    <section ref={ref} className="py-32 px-4 relative overflow-hidden">
+      <motion.div
         className="absolute inset-0"
         animate={{
           background: [
-            'radial-gradient(ellipse 80% 60% at 50% 50%, hsl(160 84% 25% / 0.4), transparent)',
-            'radial-gradient(ellipse 60% 80% at 40% 60%, hsl(160 84% 30% / 0.4), transparent)',
-            'radial-gradient(ellipse 80% 60% at 60% 40%, hsl(160 84% 25% / 0.4), transparent)',
-            'radial-gradient(ellipse 80% 60% at 50% 50%, hsl(160 84% 25% / 0.4), transparent)',
-          ]
+            "radial-gradient(ellipse 80% 60% at 50% 50%, hsl(160 84% 25% / 0.4), transparent)",
+            "radial-gradient(ellipse 60% 80% at 40% 60%, hsl(160 84% 30% / 0.4), transparent)",
+            "radial-gradient(ellipse 80% 60% at 60% 40%, hsl(160 84% 25% / 0.4), transparent)",
+            "radial-gradient(ellipse 80% 60% at 50% 50%, hsl(160 84% 25% / 0.4), transparent)",
+          ],
         }}
         transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
       />
 
-      <motion.div style={{ x: x1, y: y1 }} className="absolute top-20 left-[10%]">
-        <FloatingShape 
-          className="rounded-full border-2 border-primary/30" 
-          size={100} 
+      <motion.div
+        style={{ x: x1, y: y1 }}
+        className="absolute top-20 left-[10%]"
+      >
+        <FloatingShape
+          className="rounded-full border-2 border-primary/30"
+          size={100}
           delay={0.2}
         />
       </motion.div>
-      <motion.div style={{ x: x2, y: y2 }} className="absolute bottom-20 right-[15%]">
-        <FloatingShape 
-          className="rounded-2xl bg-primary/10" 
-          size={80} 
+      <motion.div
+        style={{ x: x2, y: y2 }}
+        className="absolute bottom-20 right-[15%]"
+      >
+        <FloatingShape
+          className="rounded-2xl bg-primary/10"
+          size={80}
           delay={0.4}
           duration={25}
         />
       </motion.div>
-      <motion.div style={{ x: x1, y: y2 }} className="absolute top-40 right-[20%]">
-        <FloatingShape 
-          className="rounded-full bg-primary/20" 
-          size={50} 
+      <motion.div
+        style={{ x: x1, y: y2 }}
+        className="absolute top-40 right-[20%]"
+      >
+        <FloatingShape
+          className="rounded-full bg-primary/20"
+          size={50}
           delay={0.6}
           duration={15}
         />
       </motion.div>
-      <motion.div style={{ x: x2, y: y1 }} className="absolute bottom-40 left-[20%]">
-        <FloatingShape 
-          className="rounded-lg border border-primary/20" 
-          size={60} 
+      <motion.div
+        style={{ x: x2, y: y1 }}
+        className="absolute bottom-40 left-[20%]"
+      >
+        <FloatingShape
+          className="rounded-lg border border-primary/20"
+          size={60}
           delay={0.8}
           duration={18}
         />
       </motion.div>
 
-      <div 
+      <div
         ref={containerRef}
         onMouseMove={handleMouseMove}
         className="container max-w-4xl mx-auto relative z-10"
@@ -124,7 +143,9 @@ const CTASection = () => {
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8"
           >
             <Sparkles className="w-4 h-4 text-primary" />
-            <span className="text-sm text-primary font-medium">Start for Free Today</span>
+            <span className="text-sm text-primary font-medium">
+              Start for Free Today
+            </span>
           </motion.div>
 
           <h2 className="font-display text-4xl md:text-6xl font-bold mb-6">
@@ -152,7 +173,8 @@ const CTASection = () => {
             transition={{ delay: 0.5, duration: 0.6 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
           >
-            Join thousands of developers and designers who create beautiful app visuals with our tool. No credit card required.
+            Join thousands of developers and designers who create beautiful app
+            visuals with our tool. No credit card required.
           </motion.p>
 
           <motion.div
@@ -161,21 +183,15 @@ const CTASection = () => {
             transition={{ delay: 0.6, duration: 0.6 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button 
-              size="lg" 
+            <Button
+              onClick={handleOnClick}
+              size="lg"
               className="glow-button pulse-glow bg-primary hover:bg-primary text-primary-foreground px-10 py-7 text-lg font-semibold rounded-xl group"
             >
               <span className="relative z-10 flex items-center gap-2">
                 Get Started Free
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </span>
-            </Button>
-            <Button 
-              variant="outline" 
-              size="lg" 
-              className="px-10 py-7 text-lg font-semibold rounded-xl border-border/50 hover:bg-secondary/50"
-            >
-              View Pricing
             </Button>
           </motion.div>
 
@@ -187,7 +203,6 @@ const CTASection = () => {
           >
             <span>✓ No credit card required</span>
             <span>✓ Free plan available</span>
-            <span>✓ Cancel anytime</span>
           </motion.div>
         </motion.div>
       </div>

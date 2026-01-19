@@ -6,7 +6,7 @@ const features = [
   {
     icon: Layers,
     title: "Beautiful Templates",
-    description: "Choose from 50+ professionally designed templates that make your screenshots pop.",
+    description: "Choose from 10+ professionally designed templates that make your screenshots pop.",
   },
   {
     icon: Palette,
@@ -26,7 +26,7 @@ const features = [
   {
     icon: Download,
     title: "Export Anywhere",
-    description: "Download in PNG, JPG, or WebP. Perfect for App Store, web, and social media.",
+    description: "Download in PNG. Perfect for App Store, web, and social media.",
   },
   {
     icon: Wand2,
