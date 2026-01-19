@@ -2,18 +2,28 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
-const TypewriterText = ({ text, delay = 0 }: { text: string; delay?: number }) => {
+const TypewriterText = ({
+  text,
+  delay = 0,
+}: {
+  text: string;
+  delay?: number;
+}) => {
   const [displayText, setDisplayText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      if (currentIndex < text.length) {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }
-    }, currentIndex === 0 ? delay : 50);
+    const timeout = setTimeout(
+      () => {
+        if (currentIndex < text.length) {
+          setDisplayText((prev) => prev + text[currentIndex]);
+          setCurrentIndex((prev) => prev + 1);
+        }
+      },
+      currentIndex === 0 ? delay : 50,
+    );
 
     return () => clearTimeout(timeout);
   }, [currentIndex, text, delay]);
@@ -28,21 +38,29 @@ const TypewriterText = ({ text, delay = 0 }: { text: string; delay?: number }) =
   );
 };
 
-const FloatingScreen = ({ 
-  className, 
-  delay, 
-  mouseX, 
+const FloatingScreen = ({
+  className,
+  delay,
+  mouseX,
   mouseY,
-  intensity = 1
-}: { 
-  className?: string; 
+  intensity = 1,
+}: {
+  className?: string;
   delay: number;
   mouseX: any;
   mouseY: any;
   intensity?: number;
 }) => {
-  const x = useTransform(mouseX, [-500, 500], [-20 * intensity, 20 * intensity]);
-  const y = useTransform(mouseY, [-500, 500], [-20 * intensity, 20 * intensity]);
+  const x = useTransform(
+    mouseX,
+    [-500, 500],
+    [-20 * intensity, 20 * intensity],
+  );
+  const y = useTransform(
+    mouseY,
+    [-500, 500],
+    [-20 * intensity, 20 * intensity],
+  );
   const springX = useSpring(x, { stiffness: 50, damping: 20 });
   const springY = useSpring(y, { stiffness: 50, damping: 20 });
 
@@ -76,6 +94,7 @@ const HeroSection = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const navigate = useNavigate();
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -86,15 +105,19 @@ const HeroSection = () => {
     mouseY.set(e.clientY - centerY);
   };
 
+  function handleOnClick() {
+    navigate("/login");
+  }
+
   return (
-    <section 
+    <section
       ref={containerRef}
       onMouseMove={handleMouseMove}
       className="relative min-h-screen flex items-center justify-center overflow-hidden px-4"
     >
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-dark/20 via-transparent to-transparent" />
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
-      
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.6 }}
@@ -108,30 +131,30 @@ const HeroSection = () => {
         className="absolute bottom-40 right-[15%] w-32 h-32 bg-primary/15 rounded-full blur-2xl floating-shape-slow"
       />
 
-      <FloatingScreen 
-        className="absolute top-[20%] left-[5%] w-48 md:w-64 opacity-60" 
-        delay={0.5} 
+      <FloatingScreen
+        className="absolute top-[20%] left-[5%] w-48 md:w-64 opacity-60"
+        delay={0.5}
         mouseX={mouseX}
         mouseY={mouseY}
         intensity={0.5}
       />
-      <FloatingScreen 
-        className="absolute top-[15%] right-[8%] w-40 md:w-56 opacity-50" 
-        delay={0.7} 
+      <FloatingScreen
+        className="absolute top-[15%] right-[8%] w-40 md:w-56 opacity-50"
+        delay={0.7}
         mouseX={mouseX}
         mouseY={mouseY}
         intensity={0.7}
       />
-      <FloatingScreen 
-        className="absolute bottom-[20%] left-[12%] w-36 md:w-48 opacity-40" 
-        delay={0.9} 
+      <FloatingScreen
+        className="absolute bottom-[20%] left-[12%] w-36 md:w-48 opacity-40"
+        delay={0.9}
         mouseX={mouseX}
         mouseY={mouseY}
         intensity={0.6}
       />
-      <FloatingScreen 
-        className="absolute bottom-[25%] right-[5%] w-44 md:w-52 opacity-55" 
-        delay={1.1} 
+      <FloatingScreen
+        className="absolute bottom-[25%] right-[5%] w-44 md:w-52 opacity-55"
+        delay={1.1}
         mouseX={mouseX}
         mouseY={mouseY}
         intensity={0.8}
@@ -145,7 +168,9 @@ const HeroSection = () => {
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-8"
         >
           <Sparkles className="w-4 h-4 text-primary" />
-          <span className="text-sm text-primary font-medium">Next-Gen Screenshot Generator</span>
+          <span className="text-sm text-primary font-medium">
+            Next-Gen Screenshot Generator
+          </span>
         </motion.div>
 
         <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
@@ -173,8 +198,8 @@ const HeroSection = () => {
           transition={{ delay: 0.6, duration: 0.6 }}
           className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10"
         >
-          Create beautiful, professional app screenshots in seconds. 
-          No design skills required – just pure visual magic.
+          Create beautiful, professional app screenshots in seconds. No design
+          skills required – just pure visual magic.
         </motion.p>
 
         <motion.div
@@ -183,8 +208,9 @@ const HeroSection = () => {
           transition={{ delay: 0.8, duration: 0.6 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
-          <Button 
-            size="lg" 
+          <Button
+            onClick={handleOnClick}
+            size="lg"
             className="glow-button pulse-glow bg-primary hover:bg-primary text-primary-foreground px-8 py-6 text-lg font-semibold rounded-xl group"
           >
             <span className="relative z-10 flex items-center gap-2">
@@ -192,33 +218,6 @@ const HeroSection = () => {
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </span>
           </Button>
-          <Button 
-            variant="outline" 
-            size="lg" 
-            className="px-8 py-6 text-lg font-semibold rounded-xl border-border/50 hover:bg-secondary/50"
-          >
-            Watch Demo
-          </Button>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.6 }}
-          className="mt-16 flex items-center justify-center gap-8 text-muted-foreground"
-        >
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-2">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="w-8 h-8 rounded-full bg-secondary border-2 border-background" />
-              ))}
-            </div>
-            <span className="text-sm">10k+ users</span>
-          </div>
-          <div className="h-4 w-px bg-border" />
-          <span className="text-sm">⭐ 4.9 rating</span>
-          <div className="h-4 w-px bg-border" />
-          <span className="text-sm">Free to start</span>
         </motion.div>
       </div>
     </section>
