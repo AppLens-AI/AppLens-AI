@@ -46,7 +46,7 @@ const StepCard = ({ step, index }: { step: typeof steps[0]; index: number }) => 
           initial={{ scaleX: 0 }}
           animate={isInView ? { scaleX: 1 } : {}}
           transition={{ delay: index * 0.2 + 0.5, duration: 0.8 }}
-          className="absolute top-10 left-[60%] hidden lg:block w-full h-0.5 origin-left"
+          className="absolute top-10 left-[35%] hidden lg:block w-full h-0.5 origin-left"
           style={{
             background: 'linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.3) 50%, transparent 100%)'
           }}
