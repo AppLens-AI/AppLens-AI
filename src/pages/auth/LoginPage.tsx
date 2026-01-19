@@ -1,11 +1,14 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { authApi } from "@/lib/api";
 import { Eye, EyeOff, Loader2, ArrowRight, Check } from "lucide-react";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || '';
+
 export default function LoginPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +17,13 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    const oauthError = searchParams.get("error");
+    if (oauthError) {
+      setError(oauthError);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +41,14 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_BASE_URL}/api/auth/google`;
+  };
+
+  const handleGitHubLogin = () => {
+    window.location.href = `${API_BASE_URL}/api/auth/github`;
   };
 
   const features = [
@@ -143,6 +161,7 @@ export default function LoginPage() {
           >
             <button
               type="button"
+              onClick={handleGoogleLogin}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-border bg-card
                          hover:bg-secondary hover:border-primary/30 transition-all duration-200 group shadow-sm"
             >
@@ -170,6 +189,7 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
+              onClick={handleGitHubLogin}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-border bg-card
                          hover:bg-secondary hover:border-primary/30 transition-all duration-200 group shadow-sm"
             >
