@@ -114,7 +114,6 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     const { slides, pushHistory } = get();
     pushHistory();
 
-    // Clone the last slide or create a default one
     const lastSlide = slides[slides.length - 1];
     const newSlide: Slide = {
       id: `slide-${Date.now()}`,

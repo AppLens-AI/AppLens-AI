@@ -78,7 +78,6 @@ export interface ImageProperties {
   shadowColor: string;
   shadowOffsetX: number;
   shadowOffsetY: number;
-  // Layout configuration
   position?: "center" | "top" | "bottom" | "top-overflow" | "bottom-overflow";
   anchorX?: "left" | "center" | "right";
   anchorY?: "top" | "center" | "bottom";
@@ -93,7 +92,6 @@ export interface ShapeProperties {
   strokeWidth: number;
   cornerRadius: number;
   shapeType: "rect" | "circle" | "rounded";
-  // Layout configuration
   position?: "top" | "center" | "bottom";
   anchorX?: "left" | "center" | "right";
   anchorY?: "top" | "center" | "bottom";
