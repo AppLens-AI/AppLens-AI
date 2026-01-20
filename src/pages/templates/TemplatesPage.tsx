@@ -23,7 +23,7 @@ export default function TemplatesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<PlatformFilter>("all");
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
-    null
+    null,
   );
   const [projectName, setProjectName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
@@ -35,7 +35,7 @@ export default function TemplatesPage() {
   const fetchTemplates = async () => {
     try {
       const response = await templatesApi.getAll(
-        filter === "all" ? undefined : filter
+        filter === "all" ? undefined : filter,
       );
       setTemplates(response.data.data || []);
     } catch (error) {
@@ -314,8 +314,8 @@ export default function TemplatesPage() {
                       selectedTemplate.platform === "ios"
                         ? "bg-blue-500/20 text-blue-400"
                         : selectedTemplate.platform === "android"
-                        ? "bg-primary/20 text-primary"
-                        : "bg-purple-500/20 text-purple-400"
+                          ? "bg-primary/20 text-primary"
+                          : "bg-purple-500/20 text-purple-400"
                     }
                   `}
                   >
