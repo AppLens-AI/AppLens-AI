@@ -51,7 +51,7 @@ export default function ExportPage() {
 
         const sizes = data.template?.jsonConfig.exports || [];
         setSelectedSizes(
-          new Set(sizes.map((s) => `${s.name}-${s.width}x${s.height}`))
+          new Set(sizes.map((s) => `${s.name}-${s.width}x${s.height}`)),
         );
 
         const slides = data.projectConfig.slides || [
@@ -67,10 +67,10 @@ export default function ExportPage() {
               .filter((l) => l.type === "image" || l.type === "screenshot")
               .map((l) => {
                 const props = normalizeLayerProperties<ImageProperties>(
-                  l.properties
+                  l.properties,
                 );
                 return props.src;
-              })
+              }),
           )
           .filter(Boolean);
 
@@ -127,7 +127,7 @@ export default function ExportPage() {
     layer: LayerConfig,
     canvas: CanvasConfig,
     exportSize: ExportSize,
-    props: any
+    props: any,
   ) => {
     const scaleX = exportSize.width / canvas.width;
     const scaleY = exportSize.height / canvas.height;
@@ -159,12 +159,12 @@ export default function ExportPage() {
 
     const isImage = layer.type === "image" || layer.type === "screenshot";
     const uniformScale = Math.min(scaleX, scaleY);
-    
-    const width = isImage 
-      ? layer.width * uniformScale * imgScale 
+
+    const width = isImage
+      ? layer.width * uniformScale * imgScale
       : layer.width * scaleX * imgScale;
-    const height = isImage 
-      ? layer.height * uniformScale * imgScale 
+    const height = isImage
+      ? layer.height * uniformScale * imgScale
       : layer.height * scaleY * imgScale;
 
     let x: number;
@@ -212,7 +212,7 @@ export default function ExportPage() {
     async (
       slideCanvas: CanvasConfig,
       slideLayers: LayerConfig[],
-      exportSize: ExportSize
+      exportSize: ExportSize,
     ): Promise<Blob | null> => {
       const scaleX = exportSize.width / slideCanvas.width;
       const scaleY = exportSize.height / slideCanvas.height;
@@ -239,7 +239,7 @@ export default function ExportPage() {
           width: exportSize.width,
           height: exportSize.height,
           fill: slideCanvas.backgroundColor,
-        })
+        }),
       );
 
       const sortedLayers = [...slideLayers].sort((a, b) => a.zIndex - b.zIndex);
@@ -249,13 +249,13 @@ export default function ExportPage() {
 
         if (layerConfig.type === "shape") {
           const props = normalizeLayerProperties<ShapeProperties>(
-            layerConfig.properties
+            layerConfig.properties,
           );
           const pos = calculateExportPosition(
             layerConfig,
             slideCanvas,
             exportSize,
-            props
+            props,
           );
 
           layer.add(
@@ -272,19 +272,19 @@ export default function ExportPage() {
               rotation: layerConfig.rotation,
               offsetX: pos.width / 2,
               offsetY: pos.height / 2,
-            })
+            }),
           );
         }
 
         if (layerConfig.type === "text") {
           const props = normalizeLayerProperties<TextProperties>(
-            layerConfig.properties
+            layerConfig.properties,
           );
           const pos = calculateExportPosition(
             layerConfig,
             slideCanvas,
             exportSize,
-            props
+            props,
           );
 
           layer.add(
@@ -299,8 +299,8 @@ export default function ExportPage() {
                 props.fontWeight === "700"
                   ? "bold"
                   : props.fontWeight === "600"
-                  ? "600"
-                  : "normal",
+                    ? "600"
+                    : "normal",
               fill: props.color || "#000000",
               align: props.align || "center",
               lineHeight: props.lineHeight || 1.5,
@@ -308,19 +308,19 @@ export default function ExportPage() {
               rotation: layerConfig.rotation,
               offsetX: pos.width / 2,
               offsetY: 0,
-            })
+            }),
           );
         }
 
         if (layerConfig.type === "image" || layerConfig.type === "screenshot") {
           const props = normalizeLayerProperties<ImageProperties>(
-            layerConfig.properties
+            layerConfig.properties,
           );
           const pos = calculateExportPosition(
             layerConfig,
             slideCanvas,
             exportSize,
-            props
+            props,
           );
 
           const img = loadedImages.get(props.src);
@@ -338,10 +338,12 @@ export default function ExportPage() {
             const shadowOffsetX = (props.shadowOffsetX || 0) * scale;
             const shadowOffsetY = (props.shadowOffsetY || 4) * scale;
             const shadowBlur = Math.max((props.shadowBlur || 20) * scale, 1);
-            
+
             let shadowOpacity = 0.25;
             if (props.shadowColor) {
-              const rgbaMatch = props.shadowColor.match(/rgba?\([^)]+,\s*([\d.]+)\s*\)/);
+              const rgbaMatch = props.shadowColor.match(
+                /rgba?\([^)]+,\s*([\d.]+)\s*\)/,
+              );
               if (rgbaMatch) {
                 shadowOpacity = parseFloat(rgbaMatch[1]);
               }
@@ -360,7 +362,7 @@ export default function ExportPage() {
             });
             shadowRect.filters([Konva.Filters.Blur]);
             shadowRect.blurRadius(shadowBlur);
-            
+
             shadowRect.cache({
               x: -blurPadding,
               y: -blurPadding,
@@ -388,7 +390,7 @@ export default function ExportPage() {
                   pos.height,
                   pos.width - borderRadius,
                   pos.height,
-                  borderRadius
+                  borderRadius,
                 );
                 ctx.lineTo(borderRadius, pos.height);
                 ctx.arcTo(
@@ -396,7 +398,7 @@ export default function ExportPage() {
                   pos.height,
                   0,
                   pos.height - borderRadius,
-                  borderRadius
+                  borderRadius,
                 );
                 ctx.lineTo(0, borderRadius);
                 ctx.arcTo(0, 0, borderRadius, 0, borderRadius);
@@ -411,7 +413,7 @@ export default function ExportPage() {
                 width: pos.width,
                 height: pos.height,
                 image: img,
-              })
+              }),
             );
             outerGroup.add(imageGroup);
           } else {
@@ -423,10 +425,10 @@ export default function ExportPage() {
                 height: pos.height,
                 fill: "#e2e8f0",
                 cornerRadius: borderRadius,
-              })
+              }),
             );
           }
-          
+
           layer.add(outerGroup);
         }
       }
@@ -452,7 +454,7 @@ export default function ExportPage() {
         }
       });
     },
-    [loadedImages]
+    [loadedImages],
   );
 
   const buildExportPath = (exportSize: ExportSize, slideIndex: number) => {
@@ -500,7 +502,7 @@ export default function ExportPage() {
     const zip = new JSZip();
     const sizes = project.template?.jsonConfig.exports || [];
     const selectedExports = sizes.filter((s) =>
-      selectedSizes.has(`${s.name}-${s.width}x${s.height}`)
+      selectedSizes.has(`${s.name}-${s.width}x${s.height}`),
     );
 
     const slides = project.projectConfig.slides || [
@@ -531,7 +533,7 @@ export default function ExportPage() {
     const zipBlob = await zip.generateAsync({ type: "blob" });
     saveAs(
       zipBlob,
-      `${project.name.replace(/[^a-z0-9]/gi, "_")}_screenshots.zip`
+      `${project.name.replace(/[^a-z0-9]/gi, "_")}_screenshots.zip`,
     );
 
     setIsExporting(false);

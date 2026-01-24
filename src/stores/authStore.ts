@@ -31,6 +31,6 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "shotify-auth",
-    }
-  )
+    },
+  ),
 );

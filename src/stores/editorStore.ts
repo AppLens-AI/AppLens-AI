@@ -37,7 +37,7 @@ interface EditorState {
   updateLayer: (
     slideId: string,
     layerId: string,
-    updates: Partial<LayerConfig>
+    updates: Partial<LayerConfig>,
   ) => void;
   deleteLayer: (slideId: string, layerId: string) => void;
   addLayer: (slideId: string, layer: LayerConfig) => void;
@@ -82,7 +82,7 @@ interface EditorState {
     layers: LayerConfig[],
     images: ImageAsset[],
     exportSizes: ExportSize[],
-    savedSlides?: SlideData[]
+    savedSlides?: SlideData[],
   ) => void;
 }
 
@@ -197,7 +197,7 @@ export const useEditorStore = create<EditorState>((set, get) => ({
         return {
           ...slide,
           layers: slide.layers.map((layer) =>
-            layer.id === layerId ? { ...layer, ...updates } : layer
+            layer.id === layerId ? { ...layer, ...updates } : layer,
           ),
         };
       }),
