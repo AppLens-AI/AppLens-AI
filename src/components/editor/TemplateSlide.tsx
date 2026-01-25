@@ -603,8 +603,8 @@ export default function TemplateSlide({
           {
             properties: {
               ...props,
-              offsetX,
-              offsetY,
+              offsetX: Math.round(offsetX * 100) / 100,
+              offsetY: Math.round(offsetY * 100) / 100,
             },
           },
           { pushToHistory: false },
@@ -654,12 +654,12 @@ export default function TemplateSlide({
           slide.id,
           interaction.layerId,
           {
-            width: newWidth,
-            height: newHeight,
+            width: Math.round(newWidth * 100) / 100,
+            height: Math.round(newHeight * 100) / 100,
             properties: {
               ...props,
-              offsetX,
-              offsetY,
+              offsetX: Math.round(offsetX * 100) / 100,
+              offsetY: Math.round(offsetY * 100) / 100,
             },
           },
           { pushToHistory: false },
