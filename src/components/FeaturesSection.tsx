@@ -1,41 +1,60 @@
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
-import { Layers, Palette, Zap, Smartphone, Download, Wand2 } from "lucide-react";
+import {
+  Layers,
+  Palette,
+  Zap,
+  Smartphone,
+  Download,
+  Wand2,
+} from "lucide-react";
 
 const features = [
   {
     icon: Layers,
     title: "Beautiful Templates",
-    description: "Choose from 10+ professionally designed templates that make your screenshots pop.",
+    description:
+      "Choose from 10+ professionally designed templates that make your screenshots pop.",
   },
   {
     icon: Palette,
     title: "Custom Styling",
-    description: "Personalize every detail – colors, gradients, shadows, and backgrounds.",
+    description:
+      "Personalize every detail – colors, gradients, shadows, and backgrounds.",
   },
   {
     icon: Zap,
     title: "Lightning Fast",
-    description: "Generate stunning visuals in seconds, not hours. No rendering wait times.",
+    description:
+      "Generate stunning visuals in seconds, not hours. No rendering wait times.",
   },
   {
     icon: Smartphone,
     title: "Device Frames",
-    description: "Showcase your app in realistic iPhone, Android, and desktop frames.",
+    description:
+      "Showcase your app in realistic iPhone, Android, and desktop frames.",
   },
   {
     icon: Download,
     title: "Export Anywhere",
-    description: "Download in PNG. Perfect for App Store, web, and social media.",
+    description:
+      "Download in PNG. Perfect for App Store, web, and social media.",
   },
   {
     icon: Wand2,
     title: "AI-Powered",
-    description: "Let AI suggest the perfect composition and styling for your screenshots.",
+    description:
+      "Let AI suggest the perfect composition and styling for your screenshots.",
   },
 ];
 
-const FeatureCard = ({ feature, index }: { feature: typeof features[0]; index: number }) => {
+const FeatureCard = ({
+  feature,
+  index,
+}: {
+  feature: (typeof features)[0];
+  index: number;
+}) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -44,15 +63,15 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0]; index: n
       ref={ref}
       initial={{ opacity: 0, y: 50, rotateX: -10 }}
       animate={isInView ? { opacity: 1, y: 0, rotateX: 0 } : {}}
-      transition={{ 
-        delay: index * 0.1, 
+      transition={{
+        delay: index * 0.1,
         duration: 0.6,
-        ease: "easeOut"
+        ease: "easeOut",
       }}
-      whileHover={{ 
-        y: -10, 
+      whileHover={{
+        y: -10,
         rotateY: 5,
-        transition: { duration: 0.3 }
+        transition: { duration: 0.3 },
       }}
       style={{ perspective: 1000 }}
       className="group"
@@ -63,7 +82,7 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0]; index: n
           whileHover={{ opacity: 1 }}
           className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent pointer-events-none"
         />
-        
+
         <motion.div
           whileHover={{ rotate: [0, -10, 10, 0], scale: 1.1 }}
           transition={{ duration: 0.5 }}
@@ -75,7 +94,7 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0]; index: n
         <h3 className="font-display text-xl font-semibold mb-3 text-foreground group-hover:text-primary transition-colors">
           {feature.title}
         </h3>
-        
+
         <p className="text-muted-foreground leading-relaxed">
           {feature.description}
         </p>
@@ -114,7 +133,8 @@ const FeaturesSection = () => {
             <span className="gradient-text block">Create Magic</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Our tool comes packed with features that make screenshot creation effortless and beautiful.
+            Our tool comes packed with features that make screenshot creation
+            effortless and beautiful.
           </p>
         </motion.div>
 
