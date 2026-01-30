@@ -15,18 +15,15 @@ import {
 } from "@/lib/layerUtils";
 import { ImagePlus, Smartphone, Loader2 } from "lucide-react";
 
-type ResizeHandle =
-  | "nw"
-  | "n"
-  | "ne"
-  | "e"
-  | "se"
-  | "s"
-  | "sw"
-  | "w";
+type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 
 type AnchorX = "left" | "center" | "right";
-type Position = "center" | "top" | "bottom" | "top-overflow" | "bottom-overflow";
+type Position =
+  | "center"
+  | "top"
+  | "bottom"
+  | "top-overflow"
+  | "bottom-overflow";
 
 interface InteractionState {
   mode: "move" | "resize";
@@ -156,8 +153,7 @@ export default function TemplateSlide({
     const anchorX: AnchorX = (props.anchorX as AnchorX) || "center";
     const position: Position = (props.position as Position) || "center";
     const offsetX = (props.offsetX as number) || 0;
-    const offsetY =
-      props.offsetY !== undefined ? (props.offsetY as number) : 0;
+    const offsetY = props.offsetY !== undefined ? (props.offsetY as number) : 0;
 
     const { centerX, centerY } = computeCenter(
       layer,
@@ -200,8 +196,7 @@ export default function TemplateSlide({
     const anchorX: AnchorX = (props.anchorX as AnchorX) || "center";
     const position: Position = (props.position as Position) || "center";
     const offsetX = (props.offsetX as number) || 0;
-    const offsetY =
-      props.offsetY !== undefined ? (props.offsetY as number) : 0;
+    const offsetY = props.offsetY !== undefined ? (props.offsetY as number) : 0;
 
     const { centerX, centerY } = computeCenter(
       layer,
@@ -237,13 +232,54 @@ export default function TemplateSlide({
   ) => {
     const handles: Array<{ id: ResizeHandle; style: React.CSSProperties }> = [
       { id: "nw", style: { top: "-6px", left: "-6px", cursor: "nwse-resize" } },
-      { id: "n", style: { top: "-6px", left: "50%", transform: "translateX(-50%)", cursor: "ns-resize" } },
-      { id: "ne", style: { top: "-6px", right: "-6px", cursor: "nesw-resize" } },
-      { id: "e", style: { top: "50%", right: "-6px", transform: "translateY(-50%)", cursor: "ew-resize" } },
-      { id: "se", style: { bottom: "-6px", right: "-6px", cursor: "nwse-resize" } },
-      { id: "s", style: { bottom: "-6px", left: "50%", transform: "translateX(-50%)", cursor: "ns-resize" } },
-      { id: "sw", style: { bottom: "-6px", left: "-6px", cursor: "nesw-resize" } },
-      { id: "w", style: { top: "50%", left: "-6px", transform: "translateY(-50%)", cursor: "ew-resize" } },
+      {
+        id: "n",
+        style: {
+          top: "-6px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          cursor: "ns-resize",
+        },
+      },
+      {
+        id: "ne",
+        style: { top: "-6px", right: "-6px", cursor: "nesw-resize" },
+      },
+      {
+        id: "e",
+        style: {
+          top: "50%",
+          right: "-6px",
+          transform: "translateY(-50%)",
+          cursor: "ew-resize",
+        },
+      },
+      {
+        id: "se",
+        style: { bottom: "-6px", right: "-6px", cursor: "nwse-resize" },
+      },
+      {
+        id: "s",
+        style: {
+          bottom: "-6px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          cursor: "ns-resize",
+        },
+      },
+      {
+        id: "sw",
+        style: { bottom: "-6px", left: "-6px", cursor: "nesw-resize" },
+      },
+      {
+        id: "w",
+        style: {
+          top: "50%",
+          left: "-6px",
+          transform: "translateY(-50%)",
+          cursor: "ew-resize",
+        },
+      },
     ];
 
     return (
@@ -346,7 +382,7 @@ export default function TemplateSlide({
     switch (layer.type) {
       case "text": {
         const props = normalizeLayerProperties<TextProperties>(
-          layer.properties
+          layer.properties,
         );
         const scaleFactor = getScaleFactor();
 
@@ -361,7 +397,7 @@ export default function TemplateSlide({
         const baseStyle = calculateLayerStyle(
           layer,
           slide.canvas,
-          layoutConfig
+          layoutConfig,
         );
 
         return (
@@ -397,7 +433,7 @@ export default function TemplateSlide({
       case "image":
       case "screenshot": {
         const props = normalizeLayerProperties<ImageProperties>(
-          layer.properties
+          layer.properties,
         );
         const scaleFactor = getScaleFactor();
         const isLoading = loadingLayers.has(layer.id);
@@ -414,7 +450,7 @@ export default function TemplateSlide({
         const baseStyle = calculateLayerStyle(
           layer,
           slide.canvas,
-          layoutConfig
+          layoutConfig,
         );
         const borderRadius = (props.borderRadius || 0) * scaleFactor;
         const shadowOffsetX = (props.shadowOffsetX || 0) * scaleFactor;
@@ -504,7 +540,9 @@ export default function TemplateSlide({
                     <span className="text-sm text-muted-foreground font-medium">
                       {props.placeholder || "Click to add image"}
                     </span>
-                    {isSelected && isActive && renderResizeHandles(layer, props)}
+                    {isSelected &&
+                      isActive &&
+                      renderResizeHandles(layer, props)}
                   </>
                 )}
               </div>
@@ -515,7 +553,7 @@ export default function TemplateSlide({
 
       case "shape": {
         const props = normalizeLayerProperties<ShapeProperties>(
-          layer.properties
+          layer.properties,
         );
         const scaleFactor = getScaleFactor();
 
@@ -530,7 +568,7 @@ export default function TemplateSlide({
         const baseStyle = calculateLayerStyle(
           layer,
           slide.canvas,
-          layoutConfig
+          layoutConfig,
         );
         const cornerRadius = (props.cornerRadius || 0) * scaleFactor;
         const strokeWidth = (props.strokeWidth || 0) * scaleFactor;
