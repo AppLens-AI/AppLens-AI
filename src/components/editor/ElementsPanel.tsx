@@ -106,7 +106,7 @@ export default function ElementsPanel() {
 
   const handleLayerUpdate = (
     layerId: string,
-    updates: Record<string, unknown>
+    updates: Record<string, unknown>,
   ) => {
     if (currentSlideId) {
       updateLayer(currentSlideId, layerId, updates);

@@ -632,8 +632,8 @@ function BackgroundPanel() {
       slides.map((s) =>
         s.id === currentSlideId
           ? { ...s, canvas: { ...s.canvas, backgroundColor: color } }
-          : s
-      )
+          : s,
+      ),
     );
   };
 
@@ -688,7 +688,7 @@ export default function ConfigPanel() {
 
   const currentSlide = slides.find((s) => s.id === currentSlideId);
   const selectedLayer = currentSlide?.layers.find(
-    (l) => l.id === selectedLayerId
+    (l) => l.id === selectedLayerId,
   );
 
   const handleUpdate = (updates: Partial<LayerConfig>) => {
