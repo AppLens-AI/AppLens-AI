@@ -387,21 +387,6 @@ export function EditorPage() {
         <ElementsPanel />
 
         <div className="flex-1 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden relative flex flex-col">
-          {currentDevice && (
-            <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 px-3 py-1.5 bg-white/90 backdrop-blur-sm border border-slate-200 rounded-full shadow-sm flex items-center gap-2">
-              <DeviceIcon
-                size={currentDevice}
-                className="w-4 h-4 text-slate-600"
-              />
-              <span className="text-xs font-medium text-slate-700">
-                {currentDevice.name}
-              </span>
-              <span className="text-xs text-slate-500">
-                ({currentDevice.width} × {currentDevice.height})
-              </span>
-            </div>
-          )}
-
           <div className="flex-1 flex items-center gap-2 px-8 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide">
             {slides.map((slide, index) => (
               <div
