@@ -385,7 +385,6 @@ export function EditorPage() {
 
       <div className="flex-1 flex overflow-hidden">
         <ElementsPanel />
-
         <div className="flex-1 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden relative flex flex-col">
           {/* Device indicator */}
           {currentDevice && (
