@@ -621,20 +621,11 @@ function TransformPanel({
 }
 
 function BackgroundPanel() {
-  const { slides, currentSlideId, setSlides, pushHistory } = useEditorStore();
-  const currentSlide = slides.find((s) => s.id === currentSlideId);
-
-  if (!currentSlide) return null;
+  const { canvas, setCanvas, pushHistory } = useEditorStore();
 
   const updateBackground = (color: string) => {
     pushHistory();
-    setSlides(
-      slides.map((s) =>
-        s.id === currentSlideId
-          ? { ...s, canvas: { ...s.canvas, backgroundColor: color } }
-          : s,
-      ),
-    );
+    setCanvas({ ...canvas, backgroundColor: color });
   };
 
   const presetColors = [
@@ -655,7 +646,7 @@ function BackgroundPanel() {
       <div className="space-y-4">
         <ColorInput
           label="Color"
-          value={currentSlide.canvas.backgroundColor}
+          value={canvas.backgroundColor}
           onChange={updateBackground}
         />
         <div className="space-y-2">
@@ -668,7 +659,7 @@ function BackgroundPanel() {
                 key={color}
                 onClick={() => updateBackground(color)}
                 className={`w-full aspect-square rounded-lg border-2 transition-all hover:scale-110 ${
-                  currentSlide.canvas.backgroundColor === color
+                  canvas.backgroundColor === color
                     ? "border-emerald-500 ring-2 ring-emerald-500/30"
                     : "border-border hover:border-border-hover"
                 }`}
@@ -683,17 +674,13 @@ function BackgroundPanel() {
 }
 
 export default function ConfigPanel() {
-  const { slides, currentSlideId, selectedLayerId, updateLayer } =
-    useEditorStore();
+  const { canvas, layers, selectedLayerId, updateLayer } = useEditorStore();
 
-  const currentSlide = slides.find((s) => s.id === currentSlideId);
-  const selectedLayer = currentSlide?.layers.find(
-    (l) => l.id === selectedLayerId,
-  );
+  const selectedLayer = layers.find((l) => l.id === selectedLayerId);
 
   const handleUpdate = (updates: Partial<LayerConfig>) => {
-    if (currentSlideId && selectedLayerId) {
-      updateLayer(currentSlideId, selectedLayerId, updates);
+    if (selectedLayerId) {
+      updateLayer(selectedLayerId, updates);
     }
   };
 
@@ -785,30 +772,28 @@ export default function ConfigPanel() {
           <>
             <BackgroundPanel />
 
-            {currentSlide && (
-              <div className="p-4 bg-surface rounded-xl border border-border">
-                <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-4 h-4 text-emerald-500" />
-                  <span className="text-sm font-medium text-text-primary">
-                    Slide Info
+            <div className="p-4 bg-surface rounded-xl border border-border">
+              <div className="flex items-center gap-2 mb-3">
+                <Sparkles className="w-4 h-4 text-emerald-500" />
+                <span className="text-sm font-medium text-text-primary">
+                  Canvas Info
+                </span>
+              </div>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Dimensions</span>
+                  <span className="text-text-primary font-medium">
+                    {canvas.width} × {canvas.height}
                   </span>
                 </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-text-muted">Dimensions</span>
-                    <span className="text-text-primary font-medium">
-                      {currentSlide.canvas.width} × {currentSlide.canvas.height}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-text-muted">Layers</span>
-                    <span className="text-text-primary font-medium">
-                      {currentSlide.layers.length}
-                    </span>
-                  </div>
+                <div className="flex justify-between">
+                  <span className="text-text-muted">Layers</span>
+                  <span className="text-text-primary font-medium">
+                    {layers.length}
+                  </span>
                 </div>
               </div>
-            )}
+            </div>
           </>
         )}
       </div>
