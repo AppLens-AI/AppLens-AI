@@ -1,10 +1,14 @@
-import { Slide } from "@/stores/editorStore";
-import { LayerConfig } from "@/types";
+import { LayerConfig, CanvasConfig } from "@/types";
+
+export interface CanvasData {
+  canvas: CanvasConfig;
+  layers: LayerConfig[];
+}
 
 export interface TemplateSlideProps {
-  slide: Slide;
+  canvas: CanvasConfig;
+  layers: LayerConfig[];
   isActive: boolean;
-  index?: number;
   onClick: () => void;
 }
 
