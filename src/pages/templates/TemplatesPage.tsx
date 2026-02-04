@@ -328,9 +328,6 @@ export default function TemplatesPage() {
                       ? "iOS & Android"
                       : selectedTemplate.platform.toUpperCase()}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    {selectedTemplate.jsonConfig.slides?.length || 0} Slides
-                  </span>
                 </div>
               </div>
             </div>
