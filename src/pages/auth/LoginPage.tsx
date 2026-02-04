@@ -67,10 +67,9 @@ export default function LoginPage() {
           <img
             src="/logo.png"
             alt="Logo"
-            className="w-20 h-20 hidden sm:block"
-            style={{ marginLeft: -20, marginRight: -14 }}
+            className="w-30 h-20 hidden sm:block"
+            style={{ marginTop: -30, marginLeft: 30 }}
           />
-          <span className="text-3xl font-bold text-foreground">Shotify</span>
         </div>
 
         <div
@@ -87,7 +86,7 @@ export default function LoginPage() {
             into art
           </h1>
           <p className="text-lg text-muted-foreground mb-8 max-w-md">
-            Join thousands of creators who use Shotify to create beautiful,
+            Join thousands of creators who use AppLens to create beautiful,
             share-ready images in seconds.
           </p>
         </div>
