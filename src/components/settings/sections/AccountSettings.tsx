@@ -109,9 +109,6 @@ export function AccountSettings() {
             Update Password
           </Button>
         </SettingsRow>
-        <SettingsRow label="Two-Factor Authentication" description="Add an extra layer of security">
-          <Switch />
-        </SettingsRow>
       </SettingsSection>
 
       <SettingsSection title="Danger Zone">
