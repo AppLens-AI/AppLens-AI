@@ -5,7 +5,6 @@ import { SettingsSection } from "../SettingsSection";
 import { SettingsRow } from "../SettingsRow";
 import { Camera, Github, Chrome, Smartphone, Trash2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
