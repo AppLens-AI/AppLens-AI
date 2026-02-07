@@ -1,5 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
+import { useQuery } from "@tanstack/react-query";
+import { notificationsApi } from "@/lib/api";
 import {
   LayoutDashboard,
   Layout,
@@ -7,6 +9,8 @@ import {
   User,
   ChevronDown,
   Settings,
+  Shield,
+  Bell,
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -26,6 +30,13 @@ export default function MainLayout() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const { data: unreadCount } = useQuery({
+    queryKey: ["unread-count"],
+    queryFn: () => notificationsApi.getUnreadCount(),
+    select: (res) => res.data.data.count,
+    refetchInterval: 30000,
+  });
 
   const handleLogout = () => {
     logout();
@@ -90,56 +101,81 @@ export default function MainLayout() {
               })}
             </nav>
 
-            <div className="relative" ref={menuRef}>
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-colors"
+            <div className="flex items-center gap-2">
+              <Link
+                to="/notifications"
+                className="relative p-2 rounded-lg hover:bg-secondary transition-colors"
               >
-                <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-                <span className="hidden sm:block text-sm font-medium text-foreground">
-                  {user?.name || "User"}
-                </span>
-                <ChevronDown
-                  className={`w-4 h-4 text-muted-foreground transition-transform ${
-                    showUserMenu ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
+                <Bell className="w-5 h-5 text-muted-foreground" />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-[10px] font-bold text-white rounded-full flex items-center justify-center">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
 
-              {showUserMenu && (
-                <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-2xl overflow-hidden animate-scale-in">
-                  <div className="px-4 py-3 border-b border-border">
-                    <p className="text-sm font-medium text-foreground">
-                      {user?.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate mt-0.5">
-                      {user?.email}
-                    </p>
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-secondary transition-colors"
+                >
+                  <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-green-600 rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                    <User className="w-4 h-4 text-white" />
                   </div>
+                  <span className="hidden sm:block text-sm font-medium text-foreground">
+                    {user?.name || "User"}
+                  </span>
+                  <ChevronDown
+                    className={`w-4 h-4 text-muted-foreground transition-transform ${
+                      showUserMenu ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
 
-                  <div className="py-2">
-                    <button
-                      onClick={isSettingsPage}
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
-                    >
-                      <Settings className="w-4 h-4 text-muted-foreground" />
-                      <span>Settings</span>
-                    </button>
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-56 bg-card border border-border rounded-xl shadow-2xl overflow-hidden animate-scale-in">
+                    <div className="px-4 py-3 border-b border-border">
+                      <p className="text-sm font-medium text-foreground">
+                        {user?.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate mt-0.5">
+                        {user?.email}
+                      </p>
+                    </div>
 
-                    <div className="my-1 h-px bg-border" />
+                    <div className="py-2">
+                      <button
+                        onClick={isSettingsPage}
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+                      >
+                        <Settings className="w-4 h-4 text-muted-foreground" />
+                        <span>Settings</span>
+                      </button>
 
-                    <button
-                      className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
-                      onClick={handleLogout}
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sign out</span>
-                    </button>
+                      {user?.role === "admin" && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setShowUserMenu(false)}
+                          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-foreground hover:bg-secondary transition-colors"
+                        >
+                          <Shield className="w-4 h-4 text-purple-500" />
+                          <span>Admin Panel</span>
+                        </Link>
+                      )}
+
+                      <div className="my-1 h-px bg-border" />
+
+                      <button
+                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-destructive hover:bg-destructive/10 transition-colors"
+                        onClick={handleLogout}
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Sign out</span>
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
