@@ -647,9 +647,23 @@ export const useEditorStore = create<EditorState>((set, get) => ({
     exportSizes.forEach((exportSize) => {
       const key = `${exportSize.name}-${exportSize.width}x${exportSize.height}`;
 
-      if (savedDeviceConfigs && savedDeviceConfigs[key]) {
-        // Use saved device config - it should already have slides array
-        const savedConfig = savedDeviceConfigs[key];
+      let savedConfig: DeviceConfig | undefined;
+      if (savedDeviceConfigs) {
+        if (savedDeviceConfigs[key]) {
+          savedConfig = savedDeviceConfigs[key];
+        } else {
+          const dimSuffix = `${exportSize.width}x${exportSize.height}`;
+          const matchingKey = Object.keys(savedDeviceConfigs).find(
+            (k) =>
+              k.includes(exportSize.name) && k.includes(dimSuffix) && !initialDeviceConfigs[k]
+          );
+          if (matchingKey) {
+            savedConfig = savedDeviceConfigs[matchingKey];
+          }
+        }
+      }
+
+      if (savedConfig) {
         
         // Handle both old format (canvas/layers) and new format (slides)
         if (savedConfig.slides && savedConfig.slides.length > 0) {
