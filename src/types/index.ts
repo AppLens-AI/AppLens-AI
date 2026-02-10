@@ -99,6 +99,14 @@ export interface ImageProperties {
   offsetX?: number;
   offsetY?: number;
   scale?: number;
+  // Frame border properties
+  frameBorder?: boolean;
+  frameBorderWidth?: number;
+  frameBorderColor?: string;
+  frameBorderRadiusTL?: number;
+  frameBorderRadiusTR?: number;
+  frameBorderRadiusBL?: number;
+  frameBorderRadiusBR?: number;
 }
 
 export interface ShapeProperties {

@@ -360,12 +360,50 @@ export default function ExportPage() {
           const hasValidImage = img && img.complete && img.naturalWidth > 0;
           const borderRadius = (props.borderRadius || 0) * scale;
 
+          // Frame border properties
+          const hasFrameBorder = props.frameBorder && (props.frameBorderWidth || 0) > 0;
+          const frameBorderWidth = (props.frameBorderWidth || 0) * scale;
+          const frameBorderColor = props.frameBorderColor || "#1a1a1a";
+          const fbRadiusTL = hasFrameBorder ? (props.frameBorderRadiusTL ?? 0) * scale : borderRadius;
+          const fbRadiusTR = hasFrameBorder ? (props.frameBorderRadiusTR ?? 0) * scale : borderRadius;
+          const fbRadiusBL = hasFrameBorder ? (props.frameBorderRadiusBL ?? 0) * scale : borderRadius;
+          const fbRadiusBR = hasFrameBorder ? (props.frameBorderRadiusBR ?? 0) * scale : borderRadius;
+
+          // Total size includes border on all sides
+          const totalWidth = hasFrameBorder ? pos.width + frameBorderWidth * 2 : pos.width;
+          const totalHeight = hasFrameBorder ? pos.height + frameBorderWidth * 2 : pos.height;
+
           const outerGroup = new Konva.Group({
             x: pos.x + pos.width / 2,
             y: pos.y + pos.height / 2,
             rotation: layerConfig.rotation,
             opacity: layerConfig.opacity,
           });
+
+          // Helper to draw a rounded rect path with per-corner radii
+          const drawRoundedRect = (
+            ctx: any,
+            x: number,
+            y: number,
+            w: number,
+            h: number,
+            rTL: number,
+            rTR: number,
+            rBR: number,
+            rBL: number,
+          ) => {
+            ctx.beginPath();
+            ctx.moveTo(x + rTL, y);
+            ctx.lineTo(x + w - rTR, y);
+            ctx.arcTo(x + w, y, x + w, y + rTR, rTR);
+            ctx.lineTo(x + w, y + h - rBR);
+            ctx.arcTo(x + w, y + h, x + w - rBR, y + h, rBR);
+            ctx.lineTo(x + rBL, y + h);
+            ctx.arcTo(x, y + h, x, y + h - rBL, rBL);
+            ctx.lineTo(x, y + rTL);
+            ctx.arcTo(x, y, x + rTL, y, rTL);
+            ctx.closePath();
+          };
 
           if (props.shadow) {
             const shadowOffsetX = (props.shadowOffsetX || 0) * scale;
@@ -385,12 +423,14 @@ export default function ExportPage() {
             const blurPadding = shadowBlur * 3;
 
             const shadowRect = new Konva.Rect({
-              x: -pos.width / 2 + shadowOffsetX,
-              y: -pos.height / 2 + shadowOffsetY,
-              width: pos.width,
-              height: pos.height,
+              x: -totalWidth / 2 + shadowOffsetX,
+              y: -totalHeight / 2 + shadowOffsetY,
+              width: totalWidth,
+              height: totalHeight,
               fill: "black",
-              cornerRadius: borderRadius,
+              cornerRadius: hasFrameBorder
+                ? [fbRadiusTL, fbRadiusTR, fbRadiusBR, fbRadiusBL]
+                : borderRadius,
               opacity: shadowOpacity,
             });
             shadowRect.filters([Konva.Filters.Blur]);
@@ -399,10 +439,32 @@ export default function ExportPage() {
             shadowRect.cache({
               x: -blurPadding,
               y: -blurPadding,
-              width: pos.width + blurPadding * 2,
-              height: pos.height + blurPadding * 2,
+              width: totalWidth + blurPadding * 2,
+              height: totalHeight + blurPadding * 2,
             });
             outerGroup.add(shadowRect);
+          }
+
+          // Frame border background (fills the border area)
+          if (hasFrameBorder) {
+            const borderBgShape = new Konva.Shape({
+              sceneFunc: (ctx, shape) => {
+                drawRoundedRect(
+                  ctx,
+                  -totalWidth / 2,
+                  -totalHeight / 2,
+                  totalWidth,
+                  totalHeight,
+                  fbRadiusTL,
+                  fbRadiusTR,
+                  fbRadiusBR,
+                  fbRadiusBL,
+                );
+                ctx.fillStrokeShape(shape);
+              },
+              fill: frameBorderColor,
+            });
+            outerGroup.add(borderBgShape);
           }
 
           if (hasValidImage) {
@@ -411,34 +473,14 @@ export default function ExportPage() {
               y: -pos.height / 2,
             });
 
+            // Inner radius = outer radius minus border width
+            const innerTL = hasFrameBorder ? Math.max(0, fbRadiusTL - frameBorderWidth) : borderRadius;
+            const innerTR = hasFrameBorder ? Math.max(0, fbRadiusTR - frameBorderWidth) : borderRadius;
+            const innerBR = hasFrameBorder ? Math.max(0, fbRadiusBR - frameBorderWidth) : borderRadius;
+            const innerBL = hasFrameBorder ? Math.max(0, fbRadiusBL - frameBorderWidth) : borderRadius;
+
             imageGroup.clipFunc((ctx) => {
-              ctx.beginPath();
-              if (borderRadius > 0) {
-                ctx.moveTo(borderRadius, 0);
-                ctx.lineTo(pos.width - borderRadius, 0);
-                ctx.arcTo(pos.width, 0, pos.width, borderRadius, borderRadius);
-                ctx.lineTo(pos.width, pos.height - borderRadius);
-                ctx.arcTo(
-                  pos.width,
-                  pos.height,
-                  pos.width - borderRadius,
-                  pos.height,
-                  borderRadius,
-                );
-                ctx.lineTo(borderRadius, pos.height);
-                ctx.arcTo(
-                  0,
-                  pos.height,
-                  0,
-                  pos.height - borderRadius,
-                  borderRadius,
-                );
-                ctx.lineTo(0, borderRadius);
-                ctx.arcTo(0, 0, borderRadius, 0, borderRadius);
-              } else {
-                ctx.rect(0, 0, pos.width, pos.height);
-              }
-              ctx.closePath();
+              drawRoundedRect(ctx, 0, 0, pos.width, pos.height, innerTL, innerTR, innerBR, innerBL);
             });
 
             const imgNaturalWidth = img.naturalWidth;
@@ -484,7 +526,14 @@ export default function ExportPage() {
                 width: pos.width,
                 height: pos.height,
                 fill: "#e2e8f0",
-                cornerRadius: borderRadius,
+                cornerRadius: hasFrameBorder
+                  ? [
+                      Math.max(0, fbRadiusTL - frameBorderWidth),
+                      Math.max(0, fbRadiusTR - frameBorderWidth),
+                      Math.max(0, fbRadiusBR - frameBorderWidth),
+                      Math.max(0, fbRadiusBL - frameBorderWidth),
+                    ]
+                  : borderRadius,
               }),
             );
           }
