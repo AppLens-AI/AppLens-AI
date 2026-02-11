@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { projectsApi } from "@/lib/api";
 import { useEditorStore } from "@/stores/editorStore";
-import { normalizeLayers } from "@/lib/layerUtils";
-import type { Project, ExportSize, DeviceConfigMap, SlideData } from "@/types";
+import { normalizeLayers, normalizeLayerProperties } from "@/lib/layerUtils";
+import { preloadFonts } from "@/lib/fonts";
+import type { Project, ExportSize, DeviceConfigMap, SlideData, TextProperties } from "@/types";
 import TemplateSlide from "@/components/editor/TemplateSlide";
 import ConfigPanel from "@/components/editor/ConfigPanel";
 import ElementsPanel from "@/components/editor/ElementsPanel";
@@ -156,6 +157,38 @@ export function EditorPage() {
           exports,
           normalizedDeviceConfigs,
         );
+
+        const fontsToLoad = new Set<string>();
+        
+        if (normalizedDeviceConfigs) {
+          Object.values(normalizedDeviceConfigs).forEach((config) => {
+            config.slides.forEach((slide) => {
+              slide.layers
+                .filter((l) => l.type === "text")
+                .forEach((l) => {
+                  const props = normalizeLayerProperties<TextProperties>(l.properties);
+                  if (props.fontFamily) {
+                    fontsToLoad.add(props.fontFamily);
+                  }
+                });
+            });
+          });
+        }
+        
+        normalizeLayers(data.projectConfig.layers)
+          .filter((l) => l.type === "text")
+          .forEach((l) => {
+            const props = normalizeLayerProperties<TextProperties>(l.properties);
+            if (props.fontFamily) {
+              fontsToLoad.add(props.fontFamily);
+            }
+          });
+
+        if (fontsToLoad.size > 0) {
+          preloadFonts(Array.from(fontsToLoad)).catch((err) => {
+            console.warn("Failed to preload some fonts:", err);
+          });
+        }
       } catch (error) {
         console.error("Failed to fetch project:", error);
         navigate("/dashboard");

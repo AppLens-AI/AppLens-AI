@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { projectsApi, getProxyImageUrl } from "@/lib/api";
+import { preloadFonts } from "@/lib/fonts";
 import type {
   Project,
   TextProperties,
@@ -149,6 +150,42 @@ export default function ExportPage() {
       return next;
     });
   };
+
+  const collectProjectFonts = useCallback((): string[] => {
+    const fonts = new Set<string>();
+
+    if (Object.keys(deviceConfigs).length > 0) {
+      Object.values(deviceConfigs).forEach((config) => {
+        if (config.slides && config.slides.length > 0) {
+          config.slides.forEach((slide) => {
+            slide.layers
+              .filter((l) => l.type === "text")
+              .forEach((l) => {
+                const props = normalizeLayerProperties<TextProperties>(
+                  l.properties,
+                );
+                if (props.fontFamily) {
+                  fonts.add(props.fontFamily);
+                }
+              });
+          });
+        }
+      });
+    }
+
+    if (project?.projectConfig?.layers) {
+      project.projectConfig.layers
+        .filter((l) => l.type === "text")
+        .forEach((l) => {
+          const props = normalizeLayerProperties<TextProperties>(l.properties);
+          if (props.fontFamily) {
+            fonts.add(props.fontFamily);
+          }
+        });
+    }
+
+    return Array.from(fonts);
+  }, [deviceConfigs, project]);
 
   const calculateExportPosition = (
     layer: LayerConfig,
@@ -361,17 +398,30 @@ export default function ExportPage() {
           const borderRadius = (props.borderRadius || 0) * scale;
 
           // Frame border properties
-          const hasFrameBorder = props.frameBorder && (props.frameBorderWidth || 0) > 0;
+          const hasFrameBorder =
+            props.frameBorder && (props.frameBorderWidth || 0) > 0;
           const frameBorderWidth = (props.frameBorderWidth || 0) * scale;
           const frameBorderColor = props.frameBorderColor || "#1a1a1a";
-          const fbRadiusTL = hasFrameBorder ? (props.frameBorderRadiusTL ?? 0) * scale : borderRadius;
-          const fbRadiusTR = hasFrameBorder ? (props.frameBorderRadiusTR ?? 0) * scale : borderRadius;
-          const fbRadiusBL = hasFrameBorder ? (props.frameBorderRadiusBL ?? 0) * scale : borderRadius;
-          const fbRadiusBR = hasFrameBorder ? (props.frameBorderRadiusBR ?? 0) * scale : borderRadius;
+          const fbRadiusTL = hasFrameBorder
+            ? (props.frameBorderRadiusTL ?? 0) * scale
+            : borderRadius;
+          const fbRadiusTR = hasFrameBorder
+            ? (props.frameBorderRadiusTR ?? 0) * scale
+            : borderRadius;
+          const fbRadiusBL = hasFrameBorder
+            ? (props.frameBorderRadiusBL ?? 0) * scale
+            : borderRadius;
+          const fbRadiusBR = hasFrameBorder
+            ? (props.frameBorderRadiusBR ?? 0) * scale
+            : borderRadius;
 
           // Total size includes border on all sides
-          const totalWidth = hasFrameBorder ? pos.width + frameBorderWidth * 2 : pos.width;
-          const totalHeight = hasFrameBorder ? pos.height + frameBorderWidth * 2 : pos.height;
+          const totalWidth = hasFrameBorder
+            ? pos.width + frameBorderWidth * 2
+            : pos.width;
+          const totalHeight = hasFrameBorder
+            ? pos.height + frameBorderWidth * 2
+            : pos.height;
 
           const outerGroup = new Konva.Group({
             x: pos.x + pos.width / 2,
@@ -474,13 +524,31 @@ export default function ExportPage() {
             });
 
             // Inner radius = outer radius minus border width
-            const innerTL = hasFrameBorder ? Math.max(0, fbRadiusTL - frameBorderWidth) : borderRadius;
-            const innerTR = hasFrameBorder ? Math.max(0, fbRadiusTR - frameBorderWidth) : borderRadius;
-            const innerBR = hasFrameBorder ? Math.max(0, fbRadiusBR - frameBorderWidth) : borderRadius;
-            const innerBL = hasFrameBorder ? Math.max(0, fbRadiusBL - frameBorderWidth) : borderRadius;
+            const innerTL = hasFrameBorder
+              ? Math.max(0, fbRadiusTL - frameBorderWidth)
+              : borderRadius;
+            const innerTR = hasFrameBorder
+              ? Math.max(0, fbRadiusTR - frameBorderWidth)
+              : borderRadius;
+            const innerBR = hasFrameBorder
+              ? Math.max(0, fbRadiusBR - frameBorderWidth)
+              : borderRadius;
+            const innerBL = hasFrameBorder
+              ? Math.max(0, fbRadiusBL - frameBorderWidth)
+              : borderRadius;
 
             imageGroup.clipFunc((ctx) => {
-              drawRoundedRect(ctx, 0, 0, pos.width, pos.height, innerTL, innerTR, innerBR, innerBL);
+              drawRoundedRect(
+                ctx,
+                0,
+                0,
+                pos.width,
+                pos.height,
+                innerTL,
+                innerTR,
+                innerBR,
+                innerBL,
+              );
             });
 
             const imgNaturalWidth = img.naturalWidth;
@@ -714,51 +782,60 @@ export default function ExportPage() {
     setIsExporting(true);
     setExportProgress(0);
 
-    const zip = new JSZip();
-    const sizes = project.template?.jsonConfig.exports || [];
-    const selectedExports = sizes.filter((s) =>
-      selectedSizes.has(`${s.name}-${s.width}x${s.height}`),
-    );
+    try {
+      const projectFonts = collectProjectFonts();
+      if (projectFonts.length > 0) {
+        await preloadFonts(projectFonts);
+      }
 
-    // Count total slides to export
-    let totalOperations = 0;
-    selectedExports.forEach((exportSize) => {
-      const config = getDeviceConfigForExport(exportSize);
-      totalOperations += config?.slides?.length || 1;
-    });
+      const zip = new JSZip();
+      const sizes = project.template?.jsonConfig.exports || [];
+      const selectedExports = sizes.filter((s) =>
+        selectedSizes.has(`${s.name}-${s.width}x${s.height}`),
+      );
 
-    let completed = 0;
+      let totalOperations = 0;
+      selectedExports.forEach((exportSize) => {
+        const config = getDeviceConfigForExport(exportSize);
+        totalOperations += config?.slides?.length || 1;
+      });
 
-    for (const exportSize of selectedExports) {
-      const config = getDeviceConfigForExport(exportSize);
+      let completed = 0;
 
-      if (config && config.slides) {
-        for (
-          let slideIndex = 0;
-          slideIndex < config.slides.length;
-          slideIndex++
-        ) {
-          const slide = config.slides[slideIndex];
-          const blob = await renderSlide(slide, exportSize);
-          if (blob) {
-            const filepath = buildExportPath(exportSize, slideIndex);
-            zip.file(filepath, blob);
+      for (const exportSize of selectedExports) {
+        const config = getDeviceConfigForExport(exportSize);
+
+        if (config && config.slides) {
+          for (
+            let slideIndex = 0;
+            slideIndex < config.slides.length;
+            slideIndex++
+          ) {
+            const slide = config.slides[slideIndex];
+            const blob = await renderSlide(slide, exportSize);
+            if (blob) {
+              const filepath = buildExportPath(exportSize, slideIndex);
+              zip.file(filepath, blob);
+            }
+            completed++;
+            setExportProgress((completed / totalOperations) * 100);
           }
-          completed++;
-          setExportProgress((completed / totalOperations) * 100);
         }
       }
+
+      const zipBlob = await zip.generateAsync({ type: "blob" });
+      saveAs(
+        zipBlob,
+        `${project.name.replace(/[^a-z0-9]/gi, "_")}_screenshots.zip`,
+      );
+
+      setExportComplete(true);
+      setTimeout(() => setExportComplete(false), 3000);
+    } catch (error) {
+      console.error("Export failed:", error);
+    } finally {
+      setIsExporting(false);
     }
-
-    const zipBlob = await zip.generateAsync({ type: "blob" });
-    saveAs(
-      zipBlob,
-      `${project.name.replace(/[^a-z0-9]/gi, "_")}_screenshots.zip`,
-    );
-
-    setIsExporting(false);
-    setExportComplete(true);
-    setTimeout(() => setExportComplete(false), 3000);
   };
 
   if (isLoading) {

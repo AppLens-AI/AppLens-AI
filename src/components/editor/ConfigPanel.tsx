@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useEditorStore } from "@/stores/editorStore";
 import { uploadApi } from "@/lib/api";
 import { normalizeLayerProperties } from "@/lib/layerUtils";
+import { AVAILABLE_FONTS, getFontsByCategory, getFontCategoryLabel, loadFont } from "@/lib/fonts";
 import type {
   LayerConfig,
   TextProperties,
@@ -242,6 +243,37 @@ function TextPropertiesPanel({
             rows={3}
             className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary resize-none focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
+            Font Family
+          </label>
+          <select
+            value={props.fontFamily || "Inter"}
+            onChange={async (e) => {
+              const newFontFamily = e.target.value;
+              // Load the font before applying it
+              await loadFont(newFontFamily);
+              updateProps({ fontFamily: newFontFamily });
+            }}
+            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all"
+            style={{ fontFamily: props.fontFamily || "Inter" }}
+          >
+            {Object.entries(getFontsByCategory()).map(([category, fonts]) => (
+              <optgroup key={category} label={getFontCategoryLabel(category as any)}>
+                {fonts.map((font) => (
+                  <option
+                    key={font.value}
+                    value={font.value}
+                    style={{ fontFamily: font.value }}
+                  >
+                    {font.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))}
+          </select>
         </div>
 
         <div className="grid grid-cols-2 gap-3">
