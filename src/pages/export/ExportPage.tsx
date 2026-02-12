@@ -403,24 +403,28 @@ export default function ExportPage() {
           const frameBorderWidth = (props.frameBorderWidth || 0) * scale;
           const frameBorderColor = props.frameBorderColor || "#1a1a1a";
           const fbRadiusTL = hasFrameBorder
-            ? (props.frameBorderRadiusTL ?? 0) * scale
+            ? (props.frameBorderRadiusTL ?? (props.borderRadius || 0)) * scale
             : borderRadius;
           const fbRadiusTR = hasFrameBorder
-            ? (props.frameBorderRadiusTR ?? 0) * scale
+            ? (props.frameBorderRadiusTR ?? (props.borderRadius || 0)) * scale
             : borderRadius;
           const fbRadiusBL = hasFrameBorder
-            ? (props.frameBorderRadiusBL ?? 0) * scale
+            ? (props.frameBorderRadiusBL ?? (props.borderRadius || 0)) * scale
             : borderRadius;
           const fbRadiusBR = hasFrameBorder
-            ? (props.frameBorderRadiusBR ?? 0) * scale
+            ? (props.frameBorderRadiusBR ?? (props.borderRadius || 0)) * scale
             : borderRadius;
 
-          // Total size includes border on all sides
-          const totalWidth = hasFrameBorder
-            ? pos.width + frameBorderWidth * 2
+          // Total size matches element dimensions (border-box: border is inside)
+          const totalWidth = pos.width;
+          const totalHeight = pos.height;
+
+          // Inner content area (image) is smaller when frame border is present
+          const innerWidth = hasFrameBorder
+            ? pos.width - frameBorderWidth * 2
             : pos.width;
-          const totalHeight = hasFrameBorder
-            ? pos.height + frameBorderWidth * 2
+          const innerHeight = hasFrameBorder
+            ? pos.height - frameBorderWidth * 2
             : pos.height;
 
           const outerGroup = new Konva.Group({
@@ -495,55 +499,33 @@ export default function ExportPage() {
             outerGroup.add(shadowRect);
           }
 
-          // Frame border background (fills the border area)
-          if (hasFrameBorder) {
-            const borderBgShape = new Konva.Shape({
-              sceneFunc: (ctx, shape) => {
-                drawRoundedRect(
-                  ctx,
-                  -totalWidth / 2,
-                  -totalHeight / 2,
-                  totalWidth,
-                  totalHeight,
-                  fbRadiusTL,
-                  fbRadiusTR,
-                  fbRadiusBR,
-                  fbRadiusBL,
-                );
-                ctx.fillStrokeShape(shape);
-              },
-              fill: frameBorderColor,
-            });
-            outerGroup.add(borderBgShape);
-          }
+          // Inner radius = outer radius minus border width
+          const innerTL = hasFrameBorder
+            ? Math.max(0, fbRadiusTL - frameBorderWidth)
+            : borderRadius;
+          const innerTR = hasFrameBorder
+            ? Math.max(0, fbRadiusTR - frameBorderWidth)
+            : borderRadius;
+          const innerBR = hasFrameBorder
+            ? Math.max(0, fbRadiusBR - frameBorderWidth)
+            : borderRadius;
+          const innerBL = hasFrameBorder
+            ? Math.max(0, fbRadiusBL - frameBorderWidth)
+            : borderRadius;
 
           if (hasValidImage) {
             const imageGroup = new Konva.Group({
-              x: -pos.width / 2,
-              y: -pos.height / 2,
+              x: -innerWidth / 2,
+              y: -innerHeight / 2,
             });
-
-            // Inner radius = outer radius minus border width
-            const innerTL = hasFrameBorder
-              ? Math.max(0, fbRadiusTL - frameBorderWidth)
-              : borderRadius;
-            const innerTR = hasFrameBorder
-              ? Math.max(0, fbRadiusTR - frameBorderWidth)
-              : borderRadius;
-            const innerBR = hasFrameBorder
-              ? Math.max(0, fbRadiusBR - frameBorderWidth)
-              : borderRadius;
-            const innerBL = hasFrameBorder
-              ? Math.max(0, fbRadiusBL - frameBorderWidth)
-              : borderRadius;
 
             imageGroup.clipFunc((ctx) => {
               drawRoundedRect(
                 ctx,
                 0,
                 0,
-                pos.width,
-                pos.height,
+                innerWidth,
+                innerHeight,
                 innerTL,
                 innerTR,
                 innerBR,
@@ -553,8 +535,8 @@ export default function ExportPage() {
 
             const imgNaturalWidth = img.naturalWidth;
             const imgNaturalHeight = img.naturalHeight;
-            const containerWidth = pos.width;
-            const containerHeight = pos.height;
+            const containerWidth = innerWidth;
+            const containerHeight = innerHeight;
 
             const imgAspect = imgNaturalWidth / imgNaturalHeight;
             const containerAspect = containerWidth / containerHeight;
@@ -589,21 +571,55 @@ export default function ExportPage() {
           } else {
             outerGroup.add(
               new Konva.Rect({
-                x: -pos.width / 2,
-                y: -pos.height / 2,
-                width: pos.width,
-                height: pos.height,
+                x: -innerWidth / 2,
+                y: -innerHeight / 2,
+                width: innerWidth,
+                height: innerHeight,
                 fill: "#e2e8f0",
                 cornerRadius: hasFrameBorder
-                  ? [
-                      Math.max(0, fbRadiusTL - frameBorderWidth),
-                      Math.max(0, fbRadiusTR - frameBorderWidth),
-                      Math.max(0, fbRadiusBR - frameBorderWidth),
-                      Math.max(0, fbRadiusBL - frameBorderWidth),
-                    ]
+                  ? [innerTL, innerTR, innerBR, innerBL]
                   : borderRadius,
               }),
             );
+          }
+
+          // Frame border drawn as a ring shape on top (outer CW + inner CCW cutout)
+          if (hasFrameBorder) {
+            const borderRingShape = new Konva.Shape({
+              sceneFunc: (ctx, shape) => {
+                const ox = -totalWidth / 2, oy = -totalHeight / 2;
+                const ix = -innerWidth / 2, iy = -innerHeight / 2;
+
+                ctx.beginPath();
+
+                // Outer rounded rect (clockwise)
+                ctx.moveTo(ox + fbRadiusTL, oy);
+                ctx.lineTo(ox + totalWidth - fbRadiusTR, oy);
+                ctx.arcTo(ox + totalWidth, oy, ox + totalWidth, oy + fbRadiusTR, fbRadiusTR);
+                ctx.lineTo(ox + totalWidth, oy + totalHeight - fbRadiusBR);
+                ctx.arcTo(ox + totalWidth, oy + totalHeight, ox + totalWidth - fbRadiusBR, oy + totalHeight, fbRadiusBR);
+                ctx.lineTo(ox + fbRadiusBL, oy + totalHeight);
+                ctx.arcTo(ox, oy + totalHeight, ox, oy + totalHeight - fbRadiusBL, fbRadiusBL);
+                ctx.lineTo(ox, oy + fbRadiusTL);
+                ctx.arcTo(ox, oy, ox + fbRadiusTL, oy, fbRadiusTL);
+                ctx.closePath();
+
+                // Inner rounded rect (counter-clockwise for cutout)
+                ctx.moveTo(ix + innerTL, iy);
+                ctx.arcTo(ix, iy, ix, iy + innerTL, innerTL);
+                ctx.lineTo(ix, iy + innerHeight - innerBL);
+                ctx.arcTo(ix, iy + innerHeight, ix + innerBL, iy + innerHeight, innerBL);
+                ctx.lineTo(ix + innerWidth - innerBR, iy + innerHeight);
+                ctx.arcTo(ix + innerWidth, iy + innerHeight, ix + innerWidth, iy + innerHeight - innerBR, innerBR);
+                ctx.lineTo(ix + innerWidth, iy + innerTR);
+                ctx.arcTo(ix + innerWidth, iy, ix + innerWidth - innerTR, iy, innerTR);
+                ctx.closePath();
+
+                ctx.fillStrokeShape(shape);
+              },
+              fill: frameBorderColor,
+            });
+            outerGroup.add(borderRingShape);
           }
 
           layer.add(outerGroup);
