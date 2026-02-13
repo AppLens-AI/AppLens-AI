@@ -11,6 +11,7 @@ import {
   Settings,
   Shield,
   Bell,
+  File
 } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
@@ -46,6 +47,8 @@ export default function MainLayout() {
   const navItems = [
     { path: "/dashboard", label: "Projects", icon: LayoutDashboard },
     { path: "/templates", label: "Templates", icon: Layout },
+    {path: "/docs", label: "Docs", icon: File },
+
   ];
 
   const isEditorPage = location.pathname.includes("/editor/");
