@@ -18,7 +18,12 @@ import { ImagePlus, Smartphone, Loader2 } from "lucide-react";
 
 type ResizeHandle = "nw" | "n" | "ne" | "e" | "se" | "s" | "sw" | "w";
 type AnchorX = "left" | "center" | "right";
-type Position = "center" | "top" | "bottom" | "top-overflow" | "bottom-overflow";
+type Position =
+  | "center"
+  | "top"
+  | "bottom"
+  | "top-overflow"
+  | "bottom-overflow";
 
 interface InteractionState {
   mode: "move" | "resize";
@@ -42,12 +47,8 @@ export default function TemplateSlide({
   isActive,
   onClick,
 }: TemplateSlideProps) {
-  const {
-    selectedLayerId,
-    setSelectedLayerId,
-    updateLayer,
-    pushHistory,
-  } = useEditorStore();
+  const { selectedLayerId, setSelectedLayerId, updateLayer, pushHistory } =
+    useEditorStore();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const uploadingLayerId = useRef<string | null>(null);
@@ -78,7 +79,7 @@ export default function TemplateSlide({
     anchorX: AnchorX,
     position: Position,
     offsetX = 0,
-    offsetY = 0
+    offsetY = 0,
   ) => {
     const { width, height } = layer;
     let centerX: number;
@@ -112,7 +113,7 @@ export default function TemplateSlide({
     width: number,
     height: number,
     anchorX: AnchorX,
-    position: Position
+    position: Position,
   ) => {
     let offsetX: number;
     switch (anchorX) {
@@ -129,9 +130,7 @@ export default function TemplateSlide({
     }
 
     const offsetY =
-      position === "bottom"
-        ? canvas.height - centerY - height / 2
-        : centerY;
+      position === "bottom" ? canvas.height - centerY - height / 2 : centerY;
 
     return { offsetX, offsetY };
   };
@@ -139,7 +138,7 @@ export default function TemplateSlide({
   const startMove = (
     e: React.MouseEvent,
     layer: LayerConfig,
-    props: Partial<TextProperties | ImageProperties | ShapeProperties>
+    props: Partial<TextProperties | ImageProperties | ShapeProperties>,
   ) => {
     if (!isActive || layer.locked || e.button !== 0) return;
 
@@ -156,7 +155,7 @@ export default function TemplateSlide({
       anchorX,
       position,
       offsetX,
-      offsetY
+      offsetY,
     );
     const pointer = getCanvasPoint(e.clientX, e.clientY);
 
@@ -182,7 +181,7 @@ export default function TemplateSlide({
     e: React.MouseEvent,
     layer: LayerConfig,
     props: Partial<TextProperties | ImageProperties | ShapeProperties>,
-    handle: ResizeHandle
+    handle: ResizeHandle,
   ) => {
     if (!isActive || layer.locked || e.button !== 0) return;
 
@@ -199,7 +198,7 @@ export default function TemplateSlide({
       anchorX,
       position,
       offsetX,
-      offsetY
+      offsetY,
     );
     const pointer = getCanvasPoint(e.clientX, e.clientY);
 
@@ -224,7 +223,7 @@ export default function TemplateSlide({
 
   const renderResizeHandles = (
     layer: LayerConfig,
-    props: Partial<TextProperties | ImageProperties | ShapeProperties>
+    props: Partial<TextProperties | ImageProperties | ShapeProperties>,
   ) => {
     const handles: Array<{ id: ResizeHandle; style: React.CSSProperties }> = [
       { id: "nw", style: { top: "-6px", left: "-6px", cursor: "nwse-resize" } },
@@ -371,7 +370,9 @@ export default function TemplateSlide({
 
     switch (layer.type) {
       case "text": {
-        const props = normalizeLayerProperties<TextProperties>(layer.properties);
+        const props = normalizeLayerProperties<TextProperties>(
+          layer.properties,
+        );
         const scaleFactor = getScaleFactor();
 
         const layoutConfig: LayoutConfig = {
@@ -416,7 +417,9 @@ export default function TemplateSlide({
 
       case "image":
       case "screenshot": {
-        const props = normalizeLayerProperties<ImageProperties>(layer.properties);
+        const props = normalizeLayerProperties<ImageProperties>(
+          layer.properties,
+        );
         const scaleFactor = getScaleFactor();
         const isLoading = loadingLayers.has(layer.id);
 
@@ -435,13 +438,22 @@ export default function TemplateSlide({
         const shadowOffsetY = (props.shadowOffsetY || 4) * scaleFactor;
         const shadowBlur = (props.shadowBlur || 20) * scaleFactor;
 
-        const hasFrameBorder = props.frameBorder && (props.frameBorderWidth || 0) > 0;
+        const hasFrameBorder =
+          props.frameBorder && (props.frameBorderWidth || 0) > 0;
         const frameBorderWidth = (props.frameBorderWidth || 0) * scaleFactor;
         const frameBorderColor = props.frameBorderColor || "#1a1a1a";
-        const frameBorderRadiusTL = (props.frameBorderRadiusTL ?? borderRadius / scaleFactor) * scaleFactor;
-        const frameBorderRadiusTR = (props.frameBorderRadiusTR ?? borderRadius / scaleFactor) * scaleFactor;
-        const frameBorderRadiusBL = (props.frameBorderRadiusBL ?? borderRadius / scaleFactor) * scaleFactor;
-        const frameBorderRadiusBR = (props.frameBorderRadiusBR ?? borderRadius / scaleFactor) * scaleFactor;
+        const frameBorderRadiusTL =
+          (props.frameBorderRadiusTL ?? borderRadius / scaleFactor) *
+          scaleFactor;
+        const frameBorderRadiusTR =
+          (props.frameBorderRadiusTR ?? borderRadius / scaleFactor) *
+          scaleFactor;
+        const frameBorderRadiusBL =
+          (props.frameBorderRadiusBL ?? borderRadius / scaleFactor) *
+          scaleFactor;
+        const frameBorderRadiusBR =
+          (props.frameBorderRadiusBR ?? borderRadius / scaleFactor) *
+          scaleFactor;
         const frameRadius = `${frameBorderRadiusTL}px ${frameBorderRadiusTR}px ${frameBorderRadiusBR}px ${frameBorderRadiusBL}px`;
 
         return (
@@ -472,7 +484,15 @@ export default function TemplateSlide({
             }`}
           >
             {props.src ? (
-              <div className="relative w-full h-full" style={{ overflow: 'hidden', borderRadius: hasFrameBorder ? `${Math.max(0, frameBorderRadiusTL - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusTR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBL - frameBorderWidth)}px` : `${borderRadius}px` }}>
+              <div
+                className="relative w-full h-full"
+                style={{
+                  overflow: "hidden",
+                  borderRadius: hasFrameBorder
+                    ? `${Math.max(0, frameBorderRadiusTL - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusTR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBL - frameBorderWidth)}px`
+                    : `${borderRadius}px`,
+                }}
+              >
                 <img
                   src={props.src}
                   alt={layer.name}
@@ -481,9 +501,7 @@ export default function TemplateSlide({
                 />
                 {isSelected && isActive && renderResizeHandles(layer, props)}
                 {isLoading && (
-                  <div
-                    className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200"
-                  >
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
                     <div className="relative">
                       <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
                       <div className="relative bg-card/90 backdrop-blur-sm p-4 rounded-full shadow-2xl">
@@ -496,7 +514,11 @@ export default function TemplateSlide({
             ) : (
               <div
                 className="w-full h-full bg-gradient-to-br from-secondary to-muted flex flex-col items-center justify-center gap-3 border-2 border-dashed border-border relative"
-                style={{ borderRadius: hasFrameBorder ? `${Math.max(0, frameBorderRadiusTL - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusTR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBL - frameBorderWidth)}px` : `${borderRadius}px` }}
+                style={{
+                  borderRadius: hasFrameBorder
+                    ? `${Math.max(0, frameBorderRadiusTL - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusTR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBR - frameBorderWidth)}px ${Math.max(0, frameBorderRadiusBL - frameBorderWidth)}px`
+                    : `${borderRadius}px`,
+                }}
                 onClick={(e) => {
                   e.stopPropagation();
                   handleLayerClick(e, layer.id);
@@ -529,7 +551,9 @@ export default function TemplateSlide({
                     <span className="text-sm text-muted-foreground font-medium">
                       {props.placeholder || "Click to add image"}
                     </span>
-                    {isSelected && isActive && renderResizeHandles(layer, props)}
+                    {isSelected &&
+                      isActive &&
+                      renderResizeHandles(layer, props)}
                   </>
                 )}
               </div>
@@ -539,7 +563,9 @@ export default function TemplateSlide({
       }
 
       case "shape": {
-        const props = normalizeLayerProperties<ShapeProperties>(layer.properties);
+        const props = normalizeLayerProperties<ShapeProperties>(
+          layer.properties,
+        );
         const scaleFactor = getScaleFactor();
 
         const layoutConfig: LayoutConfig = {
@@ -612,7 +638,7 @@ export default function TemplateSlide({
           layer.width,
           layer.height,
           interaction.anchorX,
-          interaction.position
+          interaction.position,
         );
 
         updateLayer(
@@ -624,7 +650,7 @@ export default function TemplateSlide({
               offsetY: Math.round(offsetY * 100) / 100,
             },
           },
-          { pushToHistory: false }
+          { pushToHistory: false },
         );
         return;
       }
@@ -664,7 +690,7 @@ export default function TemplateSlide({
           newWidth,
           newHeight,
           interaction.anchorX,
-          interaction.position
+          interaction.position,
         );
 
         updateLayer(
@@ -678,7 +704,7 @@ export default function TemplateSlide({
               offsetY: Math.round(offsetY * 100) / 100,
             },
           },
-          { pushToHistory: false }
+          { pushToHistory: false },
         );
       }
     };

@@ -4,7 +4,13 @@ import { projectsApi } from "@/lib/api";
 import { useEditorStore } from "@/stores/editorStore";
 import { normalizeLayers, normalizeLayerProperties } from "@/lib/layerUtils";
 import { preloadFonts } from "@/lib/fonts";
-import type { Project, ExportSize, DeviceConfigMap, SlideData, TextProperties } from "@/types";
+import type {
+  Project,
+  ExportSize,
+  DeviceConfigMap,
+  SlideData,
+  TextProperties,
+} from "@/types";
 import TemplateSlide from "@/components/editor/TemplateSlide";
 import ConfigPanel from "@/components/editor/ConfigPanel";
 import ElementsPanel from "@/components/editor/ElementsPanel";
@@ -159,14 +165,16 @@ export function EditorPage() {
         );
 
         const fontsToLoad = new Set<string>();
-        
+
         if (normalizedDeviceConfigs) {
           Object.values(normalizedDeviceConfigs).forEach((config) => {
             config.slides.forEach((slide) => {
               slide.layers
                 .filter((l) => l.type === "text")
                 .forEach((l) => {
-                  const props = normalizeLayerProperties<TextProperties>(l.properties);
+                  const props = normalizeLayerProperties<TextProperties>(
+                    l.properties,
+                  );
                   if (props.fontFamily) {
                     fontsToLoad.add(props.fontFamily);
                   }
@@ -174,11 +182,13 @@ export function EditorPage() {
             });
           });
         }
-        
+
         normalizeLayers(data.projectConfig.layers)
           .filter((l) => l.type === "text")
           .forEach((l) => {
-            const props = normalizeLayerProperties<TextProperties>(l.properties);
+            const props = normalizeLayerProperties<TextProperties>(
+              l.properties,
+            );
             if (props.fontFamily) {
               fontsToLoad.add(props.fontFamily);
             }
@@ -339,7 +349,7 @@ export function EditorPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
+        {/* <div className="flex items-center gap-1 bg-surface border border-border rounded-lg p-1">
           <button
             onClick={undo}
             disabled={historyIndex <= 0}
@@ -348,7 +358,7 @@ export function EditorPage() {
           >
             <RotateCcw className="w-4 h-4" />
           </button>
-        </div>
+        </div> */}
 
         <div className="flex items-center gap-3">
           <div className="relative" ref={deviceDropdownRef}>
