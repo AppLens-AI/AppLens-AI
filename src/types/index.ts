@@ -274,6 +274,7 @@ export interface UserListResponse {
   page: number;
   pageSize: number;
   totalPages: number;
+  items: any[]; 
 }
 
 export interface DashboardStats {

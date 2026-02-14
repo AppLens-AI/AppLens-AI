@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { 
-  Search, 
-  Filter, 
-  MoreVertical, 
-  Shield, 
-  ShieldOff, 
+import {
+  Search,
+  Filter,
+  MoreVertical,
+  Shield,
+  ShieldOff,
   Trash2,
   Loader2,
   AlertCircle,
@@ -12,7 +12,7 @@ import {
   Mail,
   Calendar,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -43,9 +43,13 @@ export default function AdminUsersPage() {
     setLoading(true);
     setError(null);
     try {
-      const response = await adminApi.getUsers(page, limit, roleFilter === "all" ? undefined : roleFilter);
+      const response = await adminApi.getUsers(
+        page,
+        limit,
+        roleFilter === "all" ? undefined : roleFilter,
+      );
       if (response.data?.success) {
-        setUsers(response.data.data.users || []);
+        setUsers(response.data.data.items || []);
         setTotalPages(Math.ceil((response.data.data.total || 0) / limit));
       } else {
         setError(response.data?.message || "Failed to load users");
@@ -95,7 +99,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const filteredUsers = users.filter(user => {
+  const filteredUsers = users.filter((user) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -117,10 +121,7 @@ export default function AdminUsersPage() {
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <p className="text-lg text-muted-foreground">{error}</p>
-        <button 
-          onClick={fetchUsers}
-          className="text-primary hover:underline"
-        >
+        <button onClick={fetchUsers} className="text-primary hover:underline">
           Try again
         </button>
       </div>
@@ -169,22 +170,37 @@ export default function AdminUsersPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-secondary/30">
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">User</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Email</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Role</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Provider</th>
-                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">Created</th>
-                <th className="text-right px-6 py-4 text-sm font-medium text-muted-foreground">Actions</th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
+                  User
+                </th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
+                  Email
+                </th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
+                  Role
+                </th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
+                  Provider
+                </th>
+                <th className="text-left px-6 py-4 text-sm font-medium text-muted-foreground">
+                  Created
+                </th>
+                <th className="text-right px-6 py-4 text-sm font-medium text-muted-foreground">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b border-border last:border-0 hover:bg-secondary/20">
+                <tr
+                  key={user.id}
+                  className="border-b border-border last:border-0 hover:bg-secondary/20"
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {user.avatar ? (
-                        <img 
-                          src={user.avatar} 
+                        <img
+                          src={user.avatar}
                           alt={user.name}
                           className="h-10 w-10 rounded-full object-cover"
                         />
@@ -196,13 +212,17 @@ export default function AdminUsersPage() {
                       <span className="font-medium">{user.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{user.email}</td>
+                  <td className="px-6 py-4 text-sm text-muted-foreground">
+                    {user.email}
+                  </td>
                   <td className="px-6 py-4">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      user.role === "admin" 
-                        ? "bg-purple-500/10 text-purple-500" 
-                        : "bg-blue-500/10 text-blue-500"
-                    }`}>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        user.role === "admin"
+                          ? "bg-purple-500/10 text-purple-500"
+                          : "bg-blue-500/10 text-blue-500"
+                      }`}
+                    >
                       {user.role}
                     </span>
                   </td>
@@ -221,7 +241,9 @@ export default function AdminUsersPage() {
                           setSelectedUser(user);
                           setShowRoleModal(true);
                         }}
-                        title={user.role === "admin" ? "Remove admin" : "Make admin"}
+                        title={
+                          user.role === "admin" ? "Remove admin" : "Make admin"
+                        }
                       >
                         {user.role === "admin" ? (
                           <ShieldOff className="h-4 w-4" />
@@ -257,7 +279,7 @@ export default function AdminUsersPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(p => Math.max(1, p - 1))}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -268,7 +290,7 @@ export default function AdminUsersPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
             >
               <ChevronRight className="h-4 w-4" />
@@ -283,12 +305,13 @@ export default function AdminUsersPage() {
           <div className="bg-card rounded-xl p-6 w-full max-w-md mx-4 border border-border">
             <h3 className="text-lg font-semibold mb-2">Delete User</h3>
             <p className="text-muted-foreground mb-4">
-              Are you sure you want to delete <strong>{selectedUser.name}</strong>? 
-              This action cannot be undone.
+              Are you sure you want to delete{" "}
+              <strong>{selectedUser.name}</strong>? This action cannot be
+              undone.
             </p>
             <div className="flex gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1"
                 onClick={() => {
                   setShowDeleteModal(false);
@@ -298,7 +321,7 @@ export default function AdminUsersPage() {
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 variant="destructive"
                 className="flex-1"
                 onClick={() => handleDeleteUser(selectedUser.id)}
@@ -322,14 +345,20 @@ export default function AdminUsersPage() {
             <h3 className="text-lg font-semibold mb-2">Change User Role</h3>
             <p className="text-muted-foreground mb-4">
               {selectedUser.role === "admin" ? (
-                <>Remove admin privileges from <strong>{selectedUser.name}</strong>?</>
+                <>
+                  Remove admin privileges from{" "}
+                  <strong>{selectedUser.name}</strong>?
+                </>
               ) : (
-                <>Grant admin privileges to <strong>{selectedUser.name}</strong>?</>
+                <>
+                  Grant admin privileges to <strong>{selectedUser.name}</strong>
+                  ?
+                </>
               )}
             </p>
             <div className="flex gap-3">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="flex-1"
                 onClick={() => {
                   setShowRoleModal(false);
@@ -339,12 +368,14 @@ export default function AdminUsersPage() {
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 className="flex-1"
-                onClick={() => handleUpdateRole(
-                  selectedUser.id, 
-                  selectedUser.role === "admin" ? "user" : "admin"
-                )}
+                onClick={() =>
+                  handleUpdateRole(
+                    selectedUser.id,
+                    selectedUser.role === "admin" ? "user" : "admin",
+                  )
+                }
                 disabled={actionLoading}
               >
                 {actionLoading ? (
