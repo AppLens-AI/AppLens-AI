@@ -1,11 +1,5 @@
 import { useState } from "react";
-import { 
-  Send, 
-  Loader2,
-  Bell,
-  Users,
-  CheckCircle
-} from "lucide-react";
+import { Send, Loader2, Bell, Users, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { adminApi } from "@/lib/api";
@@ -88,7 +82,7 @@ export default function AdminNotificationsPage() {
                 onChange={(e) => setMessage(e.target.value)}
               />
             </div>
-            <Button 
+            <Button
               className="w-full gap-2"
               onClick={handleBroadcast}
               disabled={sending || sent}
@@ -108,7 +102,7 @@ export default function AdminNotificationsPage() {
         {/* Preview */}
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold mb-6">Preview</h2>
-          
+
           <div className="rounded-lg border border-border bg-secondary/30 p-4">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-full bg-primary/10 flex-shrink-0">
@@ -119,7 +113,9 @@ export default function AdminNotificationsPage() {
                   <p className="font-medium text-sm">
                     {title || "Notification Title"}
                   </p>
-                  <span className="text-xs text-muted-foreground">Just now</span>
+                  <span className="text-xs text-muted-foreground">
+                    Just now
+                  </span>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   {message || "Your notification message will appear here..."}
@@ -134,7 +130,8 @@ export default function AdminNotificationsPage() {
               <div className="text-sm">
                 <p className="font-medium">Broadcasting to all users</p>
                 <p className="text-xs mt-1 opacity-80">
-                  This notification will be sent to all registered users in the system.
+                  This notification will be sent to all registered users in the
+                  system.
                 </p>
               </div>
             </div>

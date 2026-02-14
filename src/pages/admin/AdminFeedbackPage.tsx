@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { 
-  Search, 
-  Filter, 
-  Bug, 
-  Lightbulb, 
+import {
+  Search,
+  Filter,
+  Bug,
+  Lightbulb,
   MessageSquare,
   Loader2,
   AlertCircle,
@@ -13,12 +13,17 @@ import {
   CheckCircle,
   XCircle,
   ArrowUpCircle,
-  Eye
+  Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { adminApi } from "@/lib/api";
-import { Feedback, FeedbackType, FeedbackStatus, FeedbackPriority } from "@/types";
+import {
+  Feedback,
+  FeedbackType,
+  FeedbackStatus,
+  FeedbackPriority,
+} from "@/types";
 import { toast } from "sonner";
 
 export default function AdminFeedbackPage() {
@@ -27,10 +32,14 @@ export default function AdminFeedbackPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<FeedbackType | "all">("all");
-  const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">(
+    "all",
+  );
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(null);
+  const [selectedFeedback, setSelectedFeedback] = useState<Feedback | null>(
+    null,
+  );
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [adminResponse, setAdminResponse] = useState("");
@@ -46,10 +55,10 @@ export default function AdminFeedbackPage() {
     setError(null);
     try {
       const response = await adminApi.getAllFeedback(
-        page, 
-        limit, 
+        page,
+        limit,
         typeFilter === "all" ? undefined : typeFilter,
-        statusFilter === "all" ? undefined : statusFilter
+        statusFilter === "all" ? undefined : statusFilter,
       );
       if (response.data?.success) {
         setFeedback(response.data.data.feedback || []);
@@ -64,12 +73,15 @@ export default function AdminFeedbackPage() {
     }
   };
 
-  const handleUpdateStatus = async (feedbackId: string, status: FeedbackStatus) => {
+  const handleUpdateStatus = async (
+    feedbackId: string,
+    status: FeedbackStatus,
+  ) => {
     setActionLoading(true);
     try {
       const response = await adminApi.updateFeedback(feedbackId, {
         status,
-        adminResponse: adminResponse || undefined
+        adminResponse: adminResponse || undefined,
       });
       if (response.data?.success) {
         toast.success(`Feedback status updated to ${status}`);
@@ -87,7 +99,10 @@ export default function AdminFeedbackPage() {
     }
   };
 
-  const handleUpdatePriority = async (feedbackId: string, priority: FeedbackPriority) => {
+  const handleUpdatePriority = async (
+    feedbackId: string,
+    priority: FeedbackPriority,
+  ) => {
     setActionLoading(true);
     try {
       const response = await adminApi.updateFeedback(feedbackId, { priority });
@@ -133,13 +148,13 @@ export default function AdminFeedbackPage() {
       pending: "bg-yellow-500/10 text-yellow-500",
       in_progress: "bg-blue-500/10 text-blue-500",
       resolved: "bg-green-500/10 text-green-500",
-      closed: "bg-gray-500/10 text-gray-500"
+      closed: "bg-gray-500/10 text-gray-500",
     };
     const labels: Record<FeedbackStatus, string> = {
       pending: "Pending",
       in_progress: "In Progress",
       resolved: "Resolved",
-      closed: "Closed"
+      closed: "Closed",
     };
     return (
       <span className={`text-xs px-2 py-1 rounded-full ${styles[status]}`}>
@@ -153,16 +168,18 @@ export default function AdminFeedbackPage() {
       low: "bg-gray-500/10 text-gray-500",
       medium: "bg-yellow-500/10 text-yellow-500",
       high: "bg-orange-500/10 text-orange-500",
-      critical: "bg-red-500/10 text-red-500"
+      critical: "bg-red-500/10 text-red-500",
     };
     return (
-      <span className={`text-xs px-2 py-1 rounded-full capitalize ${styles[priority]}`}>
+      <span
+        className={`text-xs px-2 py-1 rounded-full capitalize ${styles[priority]}`}
+      >
         {priority}
       </span>
     );
   };
 
-  const filteredFeedback = feedback.filter(fb => {
+  const filteredFeedback = feedback.filter((fb) => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
     return (
@@ -184,7 +201,7 @@ export default function AdminFeedbackPage() {
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <p className="text-lg text-muted-foreground">{error}</p>
-        <button 
+        <button
           onClick={fetchFeedback}
           className="text-primary hover:underline"
         >
@@ -248,7 +265,7 @@ export default function AdminFeedbackPage() {
       {/* Feedback List */}
       <div className="space-y-4">
         {filteredFeedback.map((fb) => (
-          <div 
+          <div
             key={fb.id}
             className="rounded-xl border border-border bg-card p-4 hover:bg-secondary/20 transition-colors"
           >
@@ -273,7 +290,12 @@ export default function AdminFeedbackPage() {
               <div className="flex items-center gap-2">
                 <select
                   value={fb.priority}
-                  onChange={(e) => handleUpdatePriority(fb.id, e.target.value as FeedbackPriority)}
+                  onChange={(e) =>
+                    handleUpdatePriority(
+                      fb.id,
+                      e.target.value as FeedbackPriority,
+                    )
+                  }
                   className="px-2 py-1 rounded border border-input bg-background text-xs"
                   disabled={actionLoading}
                 >
@@ -308,7 +330,7 @@ export default function AdminFeedbackPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -319,7 +341,7 @@ export default function AdminFeedbackPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
           >
             <ChevronRight className="h-4 w-4" />
@@ -334,16 +356,21 @@ export default function AdminFeedbackPage() {
             <div className="flex items-center gap-3 mb-4">
               {getTypeIcon(selectedFeedback.type)}
               <div>
-                <h3 className="text-lg font-semibold">{selectedFeedback.title}</h3>
+                <h3 className="text-lg font-semibold">
+                  {selectedFeedback.title}
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  From {selectedFeedback.userName || "Anonymous"} • {new Date(selectedFeedback.createdAt).toLocaleString()}
+                  From {selectedFeedback.userName || "Anonymous"} •{" "}
+                  {new Date(selectedFeedback.createdAt).toLocaleString()}
                 </p>
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Description</label>
+                <label className="text-sm font-medium text-muted-foreground">
+                  Description
+                </label>
                 <p className="mt-1 p-3 rounded-lg bg-secondary/30 text-sm">
                   {selectedFeedback.description}
                 </p>
@@ -351,14 +378,20 @@ export default function AdminFeedbackPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Type</label>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Type
+                  </label>
                   <p className="mt-1 capitalize">
                     {selectedFeedback.type.replace("_", " ")}
                   </p>
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Priority</label>
-                  <p className="mt-1">{getPriorityBadge(selectedFeedback.priority)}</p>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Priority
+                  </label>
+                  <p className="mt-1">
+                    {getPriorityBadge(selectedFeedback.priority)}
+                  </p>
                 </div>
               </div>
 
@@ -367,13 +400,28 @@ export default function AdminFeedbackPage() {
                   Status
                 </label>
                 <div className="flex gap-2">
-                  {(["pending", "in_progress", "resolved", "closed"] as FeedbackStatus[]).map((status) => (
+                  {(
+                    [
+                      "pending",
+                      "in_progress",
+                      "resolved",
+                      "closed",
+                    ] as FeedbackStatus[]
+                  ).map((status) => (
                     <Button
                       key={status}
-                      variant={selectedFeedback.status === status ? "default" : "outline"}
+                      variant={
+                        selectedFeedback.status === status
+                          ? "default"
+                          : "outline"
+                      }
                       size="sm"
-                      onClick={() => handleUpdateStatus(selectedFeedback.id, status)}
-                      disabled={actionLoading || selectedFeedback.status === status}
+                      onClick={() =>
+                        handleUpdateStatus(selectedFeedback.id, status)
+                      }
+                      disabled={
+                        actionLoading || selectedFeedback.status === status
+                      }
                       className="capitalize"
                     >
                       {getStatusIcon(status)}
@@ -396,8 +444,8 @@ export default function AdminFeedbackPage() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex-1"
                   onClick={() => {
                     setShowDetailModal(false);
@@ -407,9 +455,14 @@ export default function AdminFeedbackPage() {
                 >
                   Close
                 </Button>
-                <Button 
+                <Button
                   className="flex-1"
-                  onClick={() => handleUpdateStatus(selectedFeedback.id, selectedFeedback.status)}
+                  onClick={() =>
+                    handleUpdateStatus(
+                      selectedFeedback.id,
+                      selectedFeedback.status,
+                    )
+                  }
                   disabled={actionLoading}
                 >
                   {actionLoading ? (

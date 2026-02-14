@@ -1,15 +1,15 @@
 import { useState } from "react";
 import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
-import { 
-  Users, 
-  MessageSquare, 
-  BarChart3, 
-  Settings, 
-  ChevronLeft, 
+import {
+  Users,
+  MessageSquare,
+  BarChart3,
+  Settings,
+  ChevronLeft,
   Menu,
   Shield,
   Bell,
-  Home
+  Home,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/authStore";
@@ -35,7 +35,7 @@ export default function AdminLayout() {
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
-      <aside 
+      <aside
         className={`${
           collapsed ? "w-16" : "w-64"
         } border-r border-border bg-card transition-all duration-300 flex flex-col`}
@@ -48,29 +48,35 @@ export default function AdminLayout() {
               <span className="font-semibold">Admin Panel</span>
             </div>
           )}
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => setCollapsed(!collapsed)}
             className={collapsed ? "mx-auto" : ""}
           >
-            {collapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+            {collapsed ? (
+              <Menu className="h-4 w-4" />
+            ) : (
+              <ChevronLeft className="h-4 w-4" />
+            )}
           </Button>
         </div>
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1">
           {sidebarItems.map((item) => {
-            const isActive = location.pathname === item.path || 
-              (item.path !== "/admin" && location.pathname.startsWith(item.path));
-            
+            const isActive =
+              location.pathname === item.path ||
+              (item.path !== "/admin" &&
+                location.pathname.startsWith(item.path));
+
             return (
               <Link
                 key={item.path}
                 to={item.path}
                 className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                  isActive 
-                    ? "bg-primary text-primary-foreground" 
+                  isActive
+                    ? "bg-primary text-primary-foreground"
                     : "hover:bg-secondary text-muted-foreground hover:text-foreground"
                 }`}
               >

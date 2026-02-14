@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { 
-  Users, 
-  MessageSquare, 
-  TrendingUp, 
+import {
+  Users,
+  MessageSquare,
+  TrendingUp,
   Activity,
   Loader2,
-  AlertCircle
+  AlertCircle,
 } from "lucide-react";
 import { adminApi } from "@/lib/api";
 import { DashboardStats } from "@/types";
@@ -49,10 +49,7 @@ export default function AdminDashboardPage() {
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <AlertCircle className="h-12 w-12 text-destructive" />
         <p className="text-lg text-muted-foreground">{error}</p>
-        <button 
-          onClick={fetchStats}
-          className="text-primary hover:underline"
-        >
+        <button onClick={fetchStats} className="text-primary hover:underline">
           Try again
         </button>
       </div>
@@ -67,7 +64,7 @@ export default function AdminDashboardPage() {
       change: "+12%",
       changeType: "positive" as const,
       color: "text-blue-500",
-      bgColor: "bg-blue-500/10"
+      bgColor: "bg-blue-500/10",
     },
     {
       icon: Activity,
@@ -76,7 +73,7 @@ export default function AdminDashboardPage() {
       change: "+5%",
       changeType: "positive" as const,
       color: "text-green-500",
-      bgColor: "bg-green-500/10"
+      bgColor: "bg-green-500/10",
     },
     {
       icon: MessageSquare,
@@ -85,16 +82,22 @@ export default function AdminDashboardPage() {
       change: "+8%",
       changeType: "positive" as const,
       color: "text-purple-500",
-      bgColor: "bg-purple-500/10"
+      bgColor: "bg-purple-500/10",
     },
     {
       icon: TrendingUp,
       label: "Pending Feedback",
       value: stats?.pendingFeedback || 0,
-      change: stats?.pendingFeedback && stats.pendingFeedback > 5 ? "Needs attention" : "On track",
-      changeType: stats?.pendingFeedback && stats.pendingFeedback > 5 ? "negative" as const : "positive" as const,
+      change:
+        stats?.pendingFeedback && stats.pendingFeedback > 5
+          ? "Needs attention"
+          : "On track",
+      changeType:
+        stats?.pendingFeedback && stats.pendingFeedback > 5
+          ? ("negative" as const)
+          : ("positive" as const),
       color: "text-orange-500",
-      bgColor: "bg-orange-500/10"
+      bgColor: "bg-orange-500/10",
     },
   ];
 
@@ -110,7 +113,7 @@ export default function AdminDashboardPage() {
       {/* Stats Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {statCards.map((stat) => (
-          <div 
+          <div
             key={stat.label}
             className="rounded-xl border border-border bg-card p-6"
           >
@@ -118,9 +121,13 @@ export default function AdminDashboardPage() {
               <div className={`p-2 rounded-lg ${stat.bgColor}`}>
                 <stat.icon className={`h-5 w-5 ${stat.color}`} />
               </div>
-              <span className={`text-xs font-medium ${
-                stat.changeType === "positive" ? "text-green-500" : "text-red-500"
-              }`}>
+              <span
+                className={`text-xs font-medium ${
+                  stat.changeType === "positive"
+                    ? "text-green-500"
+                    : "text-red-500"
+                }`}
+              >
                 {stat.change}
               </span>
             </div>
@@ -135,22 +142,22 @@ export default function AdminDashboardPage() {
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
           <div className="space-y-3">
-            <a 
-              href="/admin/users" 
+            <a
+              href="/admin/users"
               className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
             >
               <span>Manage Users</span>
               <Users className="h-4 w-4 text-muted-foreground" />
             </a>
-            <a 
-              href="/admin/feedback" 
+            <a
+              href="/admin/feedback"
               className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
             >
               <span>Review Feedback</span>
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </a>
-            <a 
-              href="/admin/notifications" 
+            <a
+              href="/admin/notifications"
               className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
             >
               <span>Send Notification</span>
@@ -164,7 +171,9 @@ export default function AdminDashboardPage() {
           <div className="space-y-3">
             <div className="flex items-center gap-3 text-sm">
               <div className="h-2 w-2 rounded-full bg-green-500" />
-              <span className="text-muted-foreground">System running normally</span>
+              <span className="text-muted-foreground">
+                System running normally
+              </span>
             </div>
             <div className="flex items-center gap-3 text-sm">
               <div className="h-2 w-2 rounded-full bg-blue-500" />

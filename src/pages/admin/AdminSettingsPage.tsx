@@ -1,9 +1,5 @@
 import { useState, useEffect } from "react";
-import { 
-  Settings,
-  Loader2,
-  Save
-} from "lucide-react";
+import { Settings, Loader2, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { appApi } from "@/lib/api";
@@ -71,18 +67,20 @@ export default function AdminSettingsPage() {
             </div>
             <div className="flex items-center justify-between py-3 border-b border-border">
               <span className="text-sm text-muted-foreground">Environment</span>
-              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                appInfo?.environment === 'production' 
-                  ? 'bg-green-500/10 text-green-500' 
-                  : 'bg-yellow-500/10 text-yellow-500'
-              }`}>
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium ${
+                  appInfo?.environment === "production"
+                    ? "bg-green-500/10 text-green-500"
+                    : "bg-yellow-500/10 text-yellow-500"
+                }`}
+              >
                 {appInfo?.environment || "development"}
               </span>
             </div>
             <div className="flex items-center justify-between py-3 border-b border-border">
               <span className="text-sm text-muted-foreground">Build Date</span>
               <span className="font-mono text-sm">
-                {appInfo?.buildDate || new Date().toISOString().split('T')[0]}
+                {appInfo?.buildDate || new Date().toISOString().split("T")[0]}
               </span>
             </div>
             <div className="flex items-center justify-between py-3">
@@ -98,7 +96,7 @@ export default function AdminSettingsPage() {
         {/* Feature Flags */}
         <div className="rounded-xl border border-border bg-card p-6">
           <h2 className="font-semibold mb-6">Feature Flags</h2>
-          
+
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 rounded-lg bg-secondary/30">
               <div>
@@ -136,7 +134,8 @@ export default function AdminSettingsPage() {
           </div>
 
           <p className="text-xs text-muted-foreground mt-4">
-            Feature flags are configured via environment variables and require a server restart to change.
+            Feature flags are configured via environment variables and require a
+            server restart to change.
           </p>
         </div>
       </div>
@@ -147,7 +146,8 @@ export default function AdminSettingsPage() {
           Maintenance Mode
         </h2>
         <p className="text-sm text-yellow-600/80 dark:text-yellow-400/80 mb-4">
-          Maintenance mode is currently disabled. When enabled, users will see a maintenance page and won't be able to access the application.
+          Maintenance mode is currently disabled. When enabled, users will see a
+          maintenance page and won't be able to access the application.
         </p>
         <Button variant="outline" disabled className="opacity-50">
           Enable Maintenance Mode
