@@ -204,7 +204,7 @@ export default function DashboardPage() {
 
                         {menuOpenId === project.id && (
                           <div
-                            className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-xl shadow-2xl z-20 overflow-hidden"
+                            className="absolute right-0 w-48 bg-card border border-border rounded-xl shadow-2xl z-20 overflow-hidden"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button
