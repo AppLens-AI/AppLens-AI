@@ -42,8 +42,9 @@ export default function DashboardPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => projectsApi.delete(id),
     onSuccess: (_data, id) => {
-      queryClient.setQueryData<Project[]>(["projects"], (old) =>
-        old?.filter((p) => p.id !== id) || []
+      queryClient.setQueryData<Project[]>(
+        ["projects"],
+        (old) => old?.filter((p) => p.id !== id) || [],
       );
       setDeleteId(null);
     },
@@ -182,25 +183,6 @@ export default function DashboardPage() {
                 onClick={() => navigate(`/editor/${project.id}`)}
               >
                 <div className="flex gap-4 p-4">
-                  <div className="w-40 h-56 bg-secondary rounded-lg overflow-hidden flex-shrink-0 relative">
-                    {project.thumbnail ? (
-                      <img
-                        src={project.thumbnail}
-                        alt={project.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center">
-                        <Smartphone className="w-12 h-12 text-muted-foreground mb-2" />
-                        <span className="text-xs text-muted-foreground">
-                          No preview
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  </div>
-
                   <div className="flex-1 min-w-0 flex flex-col py-2">
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <h3 className="text-lg font-semibold text-foreground truncate group-hover:text-primary transition-colors">
