@@ -54,7 +54,9 @@ export default function ExportPage() {
         const data = response.data.data as Project;
         setProject(data);
 
-        const sizes = data.template?.jsonConfig.exports || [];
+        const sizes = data.projectConfig.exports?.length
+          ? data.projectConfig.exports
+          : data.template?.jsonConfig.exports || [];
         setSelectedSizes(
           new Set(sizes.map((s) => `${s.name}-${s.width}x${s.height}`)),
         );
@@ -140,7 +142,9 @@ export default function ExportPage() {
   };
 
   const selectAllPlatform = (platform: string) => {
-    const sizes = project?.template?.jsonConfig.exports || [];
+    const sizes = project?.projectConfig.exports?.length
+      ? project.projectConfig.exports
+      : project?.template?.jsonConfig.exports || [];
     const platformSizes = sizes.filter((s) => s.platform === platform);
     setSelectedSizes((prev) => {
       const next = new Set(prev);
@@ -781,7 +785,9 @@ export default function ExportPage() {
 
   const getTotalImages = () => {
     let total = 0;
-    const sizes = project?.template?.jsonConfig.exports || [];
+    const sizes = project?.projectConfig.exports?.length
+      ? project.projectConfig.exports
+      : project?.template?.jsonConfig.exports || [];
     sizes.forEach((size) => {
       const key = `${size.name}-${size.width}x${size.height}`;
       if (selectedSizes.has(key)) {
@@ -805,7 +811,9 @@ export default function ExportPage() {
       }
 
       const zip = new JSZip();
-      const sizes = project.template?.jsonConfig.exports || [];
+      const sizes = project.projectConfig.exports?.length
+        ? project.projectConfig.exports
+        : project.template?.jsonConfig.exports || [];
       const selectedExports = sizes.filter((s) =>
         selectedSizes.has(`${s.name}-${s.width}x${s.height}`),
       );
@@ -872,7 +880,9 @@ export default function ExportPage() {
     );
   }
 
-  const exportSizes = project?.template?.jsonConfig.exports || [];
+  const exportSizes = project?.projectConfig.exports?.length
+    ? project.projectConfig.exports
+    : project?.template?.jsonConfig.exports || [];
   const iosSizes = exportSizes.filter((s) => s.platform === "ios");
   const androidSizes = exportSizes.filter((s) => s.platform === "android");
   const totalImages = getTotalImages();
