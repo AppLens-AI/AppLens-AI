@@ -4,6 +4,7 @@ import type {
   TextProperties,
   ImageProperties,
   ShapeProperties,
+  GradientProperties,
   CanvasConfig,
 } from "@/types";
 import { useEditorStore } from "@/stores/editorStore";
@@ -13,6 +14,7 @@ import {
   LayoutConfig,
   normalizeLayerProperties,
   TemplateSlideProps,
+  gradientToCSS,
 } from "@/lib/layerUtils";
 import { ImagePlus, Smartphone, Loader2 } from "lucide-react";
 
@@ -612,6 +614,41 @@ export default function TemplateSlide({
                 ? `${strokeWidth}px solid ${props.stroke}`
                 : "none",
               cursor: layer.locked || !isActive ? "default" : "move",
+            }}
+            className={`transition-all duration-150 ${
+              !layer.locked
+                ? "hover:outline hover:outline-2 hover:outline-emerald-400/50 hover:outline-offset-2"
+                : ""
+            }`}
+          >
+            {isSelected && isActive && renderResizeHandles(layer, props)}
+          </div>
+        );
+      }
+
+      case "gradient": {
+        const props = normalizeLayerProperties<GradientProperties>(
+          layer.properties,
+        );
+
+        const background = gradientToCSS(props);
+
+        return (
+          <div
+            key={layer.id}
+            onClick={(e) => handleLayerClick(e, layer.id)}
+            onMouseDown={(e) => startMove(e, layer, props)}
+            style={{
+              position: "absolute",
+              left: 0,
+              top: 0,
+              width: "100%",
+              height: "100%",
+              background,
+              opacity: layer.opacity,
+              zIndex: layer.zIndex,
+              cursor: layer.locked || !isActive ? "default" : "move",
+              ...selectionStyle,
             }}
             className={`transition-all duration-150 ${
               !layer.locked
