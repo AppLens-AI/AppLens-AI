@@ -1,4 +1,14 @@
-import { LayerConfig, CanvasConfig, GradientProperties, GradientStop } from "@/types";
+import { LayerConfig, CanvasConfig, ExportSize, GradientProperties, GradientStop } from "@/types";
+
+// ── Constants ────────────────────────────────────────────────────────────────
+
+/**
+ * Canvas-space padding for text elements (in design-coordinate pixels).
+ * Used by both the editor preview and Konva export to guarantee identical
+ * text inset.  At a typical editor scale-factor of ~0.33 this resolves to
+ * roughly 4 CSS pixels — matching the previous hard-coded `padding: 4px`.
+ */
+export const TEXT_RENDER_PADDING = 12;
 
 // ── Gradient helpers ─────────────────────────────────────────────────────────
 
@@ -192,6 +202,129 @@ export function normalizeLayer(layer: LayerConfig): LayerConfig {
 export function normalizeLayers(layers: LayerConfig[]): LayerConfig[] {
   return layers.map(normalizeLayer);
 }
+
+// ── Export position helpers ───────────────────────────────────────────────────
+
+/** Check whether a layer acts as a full-canvas background. */
+export function isLayerFullBackground(
+  layer: LayerConfig,
+  canvas: { width: number; height: number },
+): boolean {
+  return (
+    layer.type === "gradient" ||
+    (layer.type === "shape" &&
+      layer.x === 0 &&
+      layer.y === 0 &&
+      layer.width === canvas.width &&
+      layer.height === canvas.height)
+  );
+}
+
+export interface ExportLayerPosition {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+/**
+ * Compute the pixel position of a layer inside an export image.
+ *
+ * This mirrors the CSS logic in `calculateLayerStyle` *exactly* so that the
+ * Konva export and the editor preview agree pixel-for-pixel.
+ *
+ * Key differences from the previous inline calculation:
+ *  - "bottom" position for **text** no longer subtracts height (CSS sets
+ *    `translateY: 0` for text, placing the *top* edge at the computed offset).
+ *  - anchorY is respected for non-text "top" position.
+ */
+export function calculateExportLayerPosition(
+  layer: LayerConfig,
+  canvas: CanvasConfig,
+  exportSize: ExportSize,
+  props: {
+    position?: string;
+    anchorX?: string;
+    anchorY?: string;
+    offsetX?: number;
+    offsetY?: number;
+    scale?: number;
+  },
+): ExportLayerPosition {
+  const scaleX = exportSize.width / canvas.width;
+  const scaleY = exportSize.height / canvas.height;
+
+  if (isLayerFullBackground(layer, canvas)) {
+    return { x: 0, y: 0, width: exportSize.width, height: exportSize.height };
+  }
+
+  const position = props.position || "center";
+  const anchorX = props.anchorX || "center";
+  const anchorY = props.anchorY || (layer.type === "text" ? "top" : "center");
+  const offsetX = props.offsetX || 0;
+  const offsetY = props.offsetY !== undefined ? props.offsetY : 0;
+  const imgScale = props.scale || 1;
+
+  const isText = layer.type === "text";
+
+  const width = layer.width * scaleX * imgScale;
+  const height = layer.height * scaleY * imgScale;
+
+  // ── Horizontal (mirrors calculateLayerStyle anchorX) ──────────────────
+  let x: number;
+  switch (anchorX) {
+    case "left":
+      x = offsetX * scaleX;
+      break;
+    case "right":
+      x = exportSize.width - offsetX * scaleX - width;
+      break;
+    case "center":
+    default:
+      x = (exportSize.width - width) / 2 + offsetX * scaleX;
+      break;
+  }
+
+  // ── Vertical (mirrors calculateLayerStyle position + text override) ───
+  let y: number;
+  switch (position) {
+    case "top": {
+      // CSS: top = offsetY%, translateY depends on anchorY (overridden to "0" for text)
+      y = offsetY * scaleY;
+      if (!isText) {
+        if (anchorY === "center") y -= height / 2;
+        else if (anchorY === "bottom") y -= height;
+      }
+      break;
+    }
+    case "bottom": {
+      // CSS: top = (100% - offsetY%), translateY = "-100%" but "0" for text
+      if (isText) {
+        // Text top edge at (canvasHeight - offsetY)
+        y = exportSize.height - offsetY * scaleY;
+      } else {
+        // Element bottom edge at (canvasHeight - offsetY)
+        y = exportSize.height - offsetY * scaleY - height;
+      }
+      break;
+    }
+    case "top-overflow":
+    case "bottom-overflow":
+      // CSS: top = offsetY%, translateY = "0" (text override also gives "0")
+      y = offsetY * scaleY;
+      break;
+    case "center":
+    default:
+      // CSS: top = offsetY%, translateY = "-50%" but "0" for text
+      y = offsetY * scaleY;
+      if (!isText) y -= height / 2;
+      break;
+  }
+
+  return { x, y, width, height };
+}
+
+// ── Editor style helpers ─────────────────────────────────────────────────────
 
 export function calculateLayerStyle(
   layer: LayerConfig,

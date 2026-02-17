@@ -22,6 +22,8 @@ import {
   resolveGradientAngle,
   gradientToKonvaStops,
   gradientLinearPoints,
+  calculateExportLayerPosition,
+  TEXT_RENDER_PADDING,
 } from "@/lib/layerUtils";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
@@ -199,88 +201,431 @@ export default function ExportPage() {
     return Array.from(fonts);
   }, [deviceConfigs, project]);
 
-  const calculateExportPosition = (
-    layer: LayerConfig,
+  // ── Konva rendering helpers ──────────────────────────────────────────────
+
+  /** Render a shape layer onto the Konva layer. */
+  const renderShapeToKonva = (
+    konvaLayer: Konva.Layer,
+    layerConfig: LayerConfig,
     canvas: CanvasConfig,
     exportSize: ExportSize,
-    props: any,
   ) => {
+    const props = normalizeLayerProperties<ShapeProperties>(
+      layerConfig.properties,
+    );
+    const pos = calculateExportLayerPosition(
+      layerConfig,
+      canvas,
+      exportSize,
+      props,
+    );
+    const scale = Math.min(
+      exportSize.width / canvas.width,
+      exportSize.height / canvas.height,
+    );
+
+    if (props.shapeType === "circle") {
+      konvaLayer.add(
+        new Konva.Circle({
+          x: pos.x + pos.width / 2,
+          y: pos.y + pos.height / 2,
+          radius: Math.max(pos.width, pos.height) / 2,
+          fill: props.fill || "transparent",
+          stroke: props.stroke || undefined,
+          strokeWidth: props.stroke ? (props.strokeWidth || 0) * scale : 0,
+          opacity: layerConfig.opacity,
+          rotation: layerConfig.rotation,
+        }),
+      );
+    } else {
+      konvaLayer.add(
+        new Konva.Rect({
+          x: pos.x + pos.width / 2,
+          y: pos.y + pos.height / 2,
+          width: pos.width,
+          height: pos.height,
+          fill: props.fill || "transparent",
+          stroke: props.stroke || undefined,
+          strokeWidth: props.stroke ? (props.strokeWidth || 0) * scale : 0,
+          cornerRadius: (props.cornerRadius || 0) * scale,
+          opacity: layerConfig.opacity,
+          rotation: layerConfig.rotation,
+          offsetX: pos.width / 2,
+          offsetY: pos.height / 2,
+        }),
+      );
+    }
+  };
+
+  const renderGradientToKonva = (
+    konvaLayer: Konva.Layer,
+    layerConfig: LayerConfig,
+    exportSize: ExportSize,
+  ) => {
+    const props = normalizeLayerProperties<GradientProperties>(
+      layerConfig.properties,
+    );
+    const colors = resolveGradientColors(props);
+    const gradientType = props.gradientType || "linear";
+    const angle = resolveGradientAngle(props);
+    const w = exportSize.width;
+    const h = exportSize.height;
+    const konvaStops = gradientToKonvaStops(colors);
+
+    if (gradientType === "radial") {
+      const radius = Math.max(w, h) / 2;
+      konvaLayer.add(
+        new Konva.Rect({
+          x: 0,
+          y: 0,
+          width: w,
+          height: h,
+          opacity: layerConfig.opacity,
+          fillRadialGradientStartPoint: { x: w / 2, y: h / 2 },
+          fillRadialGradientEndPoint: { x: w / 2, y: h / 2 },
+          fillRadialGradientStartRadius: 0,
+          fillRadialGradientEndRadius: radius,
+          fillRadialGradientColorStops: konvaStops,
+        }),
+      );
+    } else {
+      const { start, end } = gradientLinearPoints(angle, w, h);
+      konvaLayer.add(
+        new Konva.Rect({
+          x: 0,
+          y: 0,
+          width: w,
+          height: h,
+          opacity: layerConfig.opacity,
+          fillLinearGradientStartPoint: start,
+          fillLinearGradientEndPoint: end,
+          fillLinearGradientColorStops: konvaStops,
+        }),
+      );
+    }
+  };
+
+  /** Render a text layer onto the Konva layer. */
+  const renderTextToKonva = (
+    konvaLayer: Konva.Layer,
+    layerConfig: LayerConfig,
+    canvas: CanvasConfig,
+    exportSize: ExportSize,
+  ) => {
+    const props = normalizeLayerProperties<TextProperties>(
+      layerConfig.properties,
+    );
+    const pos = calculateExportLayerPosition(
+      layerConfig,
+      canvas,
+      exportSize,
+      props,
+    );
+
     const scaleX = exportSize.width / canvas.width;
-    const scaleY = exportSize.height / canvas.height;
+    const textPadding = TEXT_RENDER_PADDING * scaleX;
 
-    const position = props.position || "center";
-    const anchorX = props.anchorX || "center";
-    const offsetX = props.offsetX || 0;
-    const offsetY = props.offsetY !== undefined ? props.offsetY : 0;
-    const imgScale = props.scale || 1;
+    konvaLayer.add(
+      new Konva.Text({
+        x: pos.x + pos.width / 2,
+        y: pos.y,
+        width: pos.width,
+        text: props.content || "",
+        fontSize: (props.fontSize || 16) * scaleX,
+        fontFamily: props.fontFamily || "Inter",
+        fontStyle:
+          props.fontWeight === "700"
+            ? "bold"
+            : props.fontWeight === "600"
+              ? "600"
+              : "normal",
+        fill: props.color || "#000000",
+        align: props.align || "center",
+        lineHeight: props.lineHeight || 1.5,
+        padding: textPadding,
+        opacity: layerConfig.opacity,
+        rotation: layerConfig.rotation,
+        offsetX: pos.width / 2,
+      }),
+    );
+  };
 
-    const isFullBackground =
-      layer.type === "shape" &&
-      layer.x === 0 &&
-      layer.y === 0 &&
-      layer.width === canvas.width &&
-      layer.height === canvas.height;
+  const drawRoundedRect = (
+    ctx: any,
+    x: number,
+    y: number,
+    w: number,
+    h: number,
+    rTL: number,
+    rTR: number,
+    rBR: number,
+    rBL: number,
+  ) => {
+    ctx.beginPath();
+    ctx.moveTo(x + rTL, y);
+    ctx.lineTo(x + w - rTR, y);
+    ctx.arcTo(x + w, y, x + w, y + rTR, rTR);
+    ctx.lineTo(x + w, y + h - rBR);
+    ctx.arcTo(x + w, y + h, x + w - rBR, y + h, rBR);
+    ctx.lineTo(x + rBL, y + h);
+    ctx.arcTo(x, y + h, x, y + h - rBL, rBL);
+    ctx.lineTo(x, y + rTL);
+    ctx.arcTo(x, y, x + rTL, y, rTL);
+    ctx.closePath();
+  };
 
-    if (isFullBackground) {
-      return {
-        x: 0,
-        y: 0,
-        width: exportSize.width,
-        height: exportSize.height,
-        offsetX: 0,
-        offsetY: 0,
-      };
+  const renderImageToKonva = (
+    konvaLayer: Konva.Layer,
+    layerConfig: LayerConfig,
+    canvas: CanvasConfig,
+    exportSize: ExportSize,
+  ) => {
+    const props = normalizeLayerProperties<ImageProperties>(
+      layerConfig.properties,
+    );
+    const pos = calculateExportLayerPosition(
+      layerConfig,
+      canvas,
+      exportSize,
+      props,
+    );
+    const scale = Math.min(
+      exportSize.width / canvas.width,
+      exportSize.height / canvas.height,
+    );
+
+    const img = loadedImages.get(props.src);
+    const hasValidImage = img && img.complete && img.naturalWidth > 0;
+    const borderRadius = (props.borderRadius || 0) * scale;
+
+    const hasFrameBorder =
+      props.frameBorder && (props.frameBorderWidth || 0) > 0;
+    const frameBorderWidth = (props.frameBorderWidth || 0) * scale;
+    const frameBorderColor = props.frameBorderColor || "#1a1a1a";
+    const fbRadiusTL = hasFrameBorder
+      ? (props.frameBorderRadiusTL ?? (props.borderRadius || 0)) * scale
+      : borderRadius;
+    const fbRadiusTR = hasFrameBorder
+      ? (props.frameBorderRadiusTR ?? (props.borderRadius || 0)) * scale
+      : borderRadius;
+    const fbRadiusBL = hasFrameBorder
+      ? (props.frameBorderRadiusBL ?? (props.borderRadius || 0)) * scale
+      : borderRadius;
+    const fbRadiusBR = hasFrameBorder
+      ? (props.frameBorderRadiusBR ?? (props.borderRadius || 0)) * scale
+      : borderRadius;
+
+    const totalWidth = pos.width;
+    const totalHeight = pos.height;
+    const innerWidth = hasFrameBorder
+      ? pos.width - frameBorderWidth * 2
+      : pos.width;
+    const innerHeight = hasFrameBorder
+      ? pos.height - frameBorderWidth * 2
+      : pos.height;
+
+    const outerGroup = new Konva.Group({
+      x: pos.x + pos.width / 2,
+      y: pos.y + pos.height / 2,
+      rotation: layerConfig.rotation,
+      opacity: layerConfig.opacity,
+    });
+
+    if (props.shadow) {
+      const shadowOffsetX = (props.shadowOffsetX || 0) * scale;
+      const shadowOffsetY = (props.shadowOffsetY || 4) * scale;
+      const shadowBlur = Math.max((props.shadowBlur || 20) * scale, 1);
+      let shadowOpacity = 0.25;
+      if (props.shadowColor) {
+        const rgbaMatch = props.shadowColor.match(
+          /rgba?\([^)]+,\s*([\d.]+)\s*\)/,
+        );
+        if (rgbaMatch) shadowOpacity = parseFloat(rgbaMatch[1]);
+      }
+      const blurPadding = shadowBlur * 3;
+      const shadowRect = new Konva.Rect({
+        x: -totalWidth / 2 + shadowOffsetX,
+        y: -totalHeight / 2 + shadowOffsetY,
+        width: totalWidth,
+        height: totalHeight,
+        fill: "black",
+        cornerRadius: hasFrameBorder
+          ? [fbRadiusTL, fbRadiusTR, fbRadiusBR, fbRadiusBL]
+          : borderRadius,
+        opacity: shadowOpacity,
+      });
+      shadowRect.filters([Konva.Filters.Blur]);
+      shadowRect.blurRadius(shadowBlur);
+      shadowRect.cache({
+        x: -blurPadding,
+        y: -blurPadding,
+        width: totalWidth + blurPadding * 2,
+        height: totalHeight + blurPadding * 2,
+      });
+      outerGroup.add(shadowRect);
     }
 
-    const width = layer.width * scaleX * imgScale;
-    const height = layer.height * scaleY * imgScale;
+    // Inner corner radii
+    const innerTL = hasFrameBorder
+      ? Math.max(0, fbRadiusTL - frameBorderWidth)
+      : borderRadius;
+    const innerTR = hasFrameBorder
+      ? Math.max(0, fbRadiusTR - frameBorderWidth)
+      : borderRadius;
+    const innerBR = hasFrameBorder
+      ? Math.max(0, fbRadiusBR - frameBorderWidth)
+      : borderRadius;
+    const innerBL = hasFrameBorder
+      ? Math.max(0, fbRadiusBL - frameBorderWidth)
+      : borderRadius;
 
-    let x: number;
-    switch (anchorX) {
-      case "left":
-        x = offsetX * scaleX;
-        break;
-      case "right":
-        x = exportSize.width - offsetX * scaleX - width;
-        break;
-      case "center":
-      default:
-        x = (exportSize.width - width) / 2 + offsetX * scaleX;
-        break;
+    if (hasValidImage) {
+      const cw = Math.ceil(innerWidth);
+      const ch = Math.ceil(innerHeight);
+      const offCanvas = document.createElement("canvas");
+      offCanvas.width = cw;
+      offCanvas.height = ch;
+      const offCtx = offCanvas.getContext("2d");
+
+      if (offCtx) {
+        if (innerTL > 0 || innerTR > 0 || innerBR > 0 || innerBL > 0) {
+          drawRoundedRect(
+            offCtx,
+            0,
+            0,
+            cw,
+            ch,
+            innerTL,
+            innerTR,
+            innerBR,
+            innerBL,
+          );
+          offCtx.clip();
+        }
+
+        const imgAspect = img.naturalWidth / img.naturalHeight;
+        const containerAspect = cw / ch;
+        let dw: number, dh: number, dx: number, dy: number;
+
+        if (imgAspect > containerAspect) {
+          dh = ch;
+          dw = dh * imgAspect;
+          dx = (cw - dw) / 2;
+          dy = 0;
+        } else {
+          dw = cw;
+          dh = dw / imgAspect;
+          dx = 0;
+          dy = (ch - dh) / 2;
+        }
+
+        offCtx.drawImage(img, dx, dy, dw, dh);
+
+        outerGroup.add(
+          new Konva.Image({
+            x: -cw / 2,
+            y: -ch / 2,
+            width: cw,
+            height: ch,
+            image: offCanvas,
+          }),
+        );
+      }
+    } else {
+      outerGroup.add(
+        new Konva.Rect({
+          x: -innerWidth / 2,
+          y: -innerHeight / 2,
+          width: innerWidth,
+          height: innerHeight,
+          fill: "#e2e8f0",
+          cornerRadius: hasFrameBorder
+            ? [innerTL, innerTR, innerBR, innerBL]
+            : borderRadius,
+        }),
+      );
     }
 
-    let y: number;
-    switch (position) {
-      case "top":
-        y = offsetY * scaleY;
-        break;
-      case "bottom":
-        y = exportSize.height - offsetY * scaleY - height;
-        break;
-      case "top-overflow":
-        y = offsetY * scaleY;
-        break;
-      case "bottom-overflow":
-        y = offsetY * scaleY;
-        break;
-      case "center":
-      default:
-        y = offsetY * scaleY;
-        if (layer.type !== "text") y -= height / 2;
-        break;
+    // Frame border ring
+    if (hasFrameBorder) {
+      const borderRingShape = new Konva.Shape({
+        sceneFunc: (ctx, shape) => {
+          const ox = -totalWidth / 2,
+            oy = -totalHeight / 2;
+          const ix = -innerWidth / 2,
+            iy = -innerHeight / 2;
+          ctx.beginPath();
+          // Outer (CW)
+          ctx.moveTo(ox + fbRadiusTL, oy);
+          ctx.lineTo(ox + totalWidth - fbRadiusTR, oy);
+          ctx.arcTo(
+            ox + totalWidth,
+            oy,
+            ox + totalWidth,
+            oy + fbRadiusTR,
+            fbRadiusTR,
+          );
+          ctx.lineTo(ox + totalWidth, oy + totalHeight - fbRadiusBR);
+          ctx.arcTo(
+            ox + totalWidth,
+            oy + totalHeight,
+            ox + totalWidth - fbRadiusBR,
+            oy + totalHeight,
+            fbRadiusBR,
+          );
+          ctx.lineTo(ox + fbRadiusBL, oy + totalHeight);
+          ctx.arcTo(
+            ox,
+            oy + totalHeight,
+            ox,
+            oy + totalHeight - fbRadiusBL,
+            fbRadiusBL,
+          );
+          ctx.lineTo(ox, oy + fbRadiusTL);
+          ctx.arcTo(ox, oy, ox + fbRadiusTL, oy, fbRadiusTL);
+          ctx.closePath();
+          // Inner (CCW cutout)
+          ctx.moveTo(ix + innerTL, iy);
+          ctx.arcTo(ix, iy, ix, iy + innerTL, innerTL);
+          ctx.lineTo(ix, iy + innerHeight - innerBL);
+          ctx.arcTo(
+            ix,
+            iy + innerHeight,
+            ix + innerBL,
+            iy + innerHeight,
+            innerBL,
+          );
+          ctx.lineTo(ix + innerWidth - innerBR, iy + innerHeight);
+          ctx.arcTo(
+            ix + innerWidth,
+            iy + innerHeight,
+            ix + innerWidth,
+            iy + innerHeight - innerBR,
+            innerBR,
+          );
+          ctx.lineTo(ix + innerWidth, iy + innerTR);
+          ctx.arcTo(
+            ix + innerWidth,
+            iy,
+            ix + innerWidth - innerTR,
+            iy,
+            innerTR,
+          );
+          ctx.closePath();
+          ctx.fillStrokeShape(shape);
+        },
+        fill: frameBorderColor,
+      });
+      outerGroup.add(borderRingShape);
     }
 
-    return { x, y, width, height, offsetX: 0, offsetY: 0 };
+    konvaLayer.add(outerGroup);
   };
 
   const renderSlide = useCallback(
     async (slide: SlideData, exportSize: ExportSize): Promise<Blob | null> => {
       const canvas = slide.canvas;
       const layers = normalizeLayers(slide.layers);
-
-      const scaleX = exportSize.width / canvas.width;
-      const scaleY = exportSize.height / canvas.height;
-      const scale = Math.min(scaleX, scaleY);
 
       const container = document.createElement("div");
       container.style.position = "absolute";
@@ -311,375 +656,20 @@ export default function ExportPage() {
       for (const layerConfig of sortedLayers) {
         if (!layerConfig.visible) continue;
 
-        if (layerConfig.type === "shape") {
-          const props = normalizeLayerProperties<ShapeProperties>(
-            layerConfig.properties,
-          );
-          const pos = calculateExportPosition(
-            layerConfig,
-            canvas,
-            exportSize,
-            props,
-          );
-
-          if (props.shapeType === "circle") {
-            layer.add(
-              new Konva.Circle({
-                x: pos.x + pos.width / 2,
-                y: pos.y + pos.height / 2,
-                radius: Math.max(pos.width, pos.height) / 2,
-                fill: props.fill || "transparent",
-                stroke: props.stroke || undefined,
-                strokeWidth: props.stroke
-                  ? (props.strokeWidth || 0) * scale
-                  : 0,
-                opacity: layerConfig.opacity,
-                rotation: layerConfig.rotation,
-              }),
-            );
-          } else {
-            layer.add(
-              new Konva.Rect({
-                x: pos.x + pos.width / 2,
-                y: pos.y + pos.height / 2,
-                width: pos.width,
-                height: pos.height,
-                fill: props.fill || "transparent",
-                stroke: props.stroke || undefined,
-                strokeWidth: props.stroke
-                  ? (props.strokeWidth || 0) * scale
-                  : 0,
-                cornerRadius: (props.cornerRadius || 0) * scale,
-                opacity: layerConfig.opacity,
-                rotation: layerConfig.rotation,
-                offsetX: pos.width / 2,
-                offsetY: pos.height / 2,
-              }),
-            );
-          }
-        }
-
-        if (layerConfig.type === "gradient") {
-          const props = normalizeLayerProperties<GradientProperties>(
-            layerConfig.properties,
-          );
-
-          const colors = resolveGradientColors(props);
-          const gradientType = props.gradientType || "linear";
-          const angle = resolveGradientAngle(props);
-          const w = exportSize.width;
-          const h = exportSize.height;
-          const konvaStops = gradientToKonvaStops(colors);
-
-          if (gradientType === "radial") {
-            const radius = Math.max(w, h) / 2;
-            layer.add(
-              new Konva.Rect({
-                x: 0,
-                y: 0,
-                width: w,
-                height: h,
-                opacity: layerConfig.opacity,
-                fillRadialGradientStartPoint: { x: w / 2, y: h / 2 },
-                fillRadialGradientEndPoint: { x: w / 2, y: h / 2 },
-                fillRadialGradientStartRadius: 0,
-                fillRadialGradientEndRadius: radius,
-                fillRadialGradientColorStops: konvaStops,
-              }),
-            );
-          } else {
-            const { start, end } = gradientLinearPoints(angle, w, h);
-            layer.add(
-              new Konva.Rect({
-                x: 0,
-                y: 0,
-                width: w,
-                height: h,
-                opacity: layerConfig.opacity,
-                fillLinearGradientStartPoint: start,
-                fillLinearGradientEndPoint: end,
-                fillLinearGradientColorStops: konvaStops,
-              }),
-            );
-          }
-        }
-
-        if (layerConfig.type === "text") {
-          const props = normalizeLayerProperties<TextProperties>(
-            layerConfig.properties,
-          );
-          const pos = calculateExportPosition(
-            layerConfig,
-            canvas,
-            exportSize,
-            props,
-          );
-
-          layer.add(
-            new Konva.Text({
-              x: pos.x + pos.width / 2,
-              y: pos.y,
-              width: pos.width,
-              text: props.content || "",
-              fontSize: (props.fontSize || 16) * scale,
-              fontFamily: props.fontFamily || "Inter",
-              fontStyle:
-                props.fontWeight === "700"
-                  ? "bold"
-                  : props.fontWeight === "600"
-                    ? "600"
-                    : "normal",
-              fill: props.color || "#000000",
-              align: props.align || "center",
-              lineHeight: props.lineHeight || 1.5,
-              opacity: layerConfig.opacity,
-              rotation: layerConfig.rotation,
-              offsetX: pos.width / 2,
-            }),
-          );
-        }
-
-        if (layerConfig.type === "image" || layerConfig.type === "screenshot") {
-          const props = normalizeLayerProperties<ImageProperties>(
-            layerConfig.properties,
-          );
-          const pos = calculateExportPosition(
-            layerConfig,
-            canvas,
-            exportSize,
-            props,
-          );
-
-          const img = loadedImages.get(props.src);
-          const hasValidImage = img && img.complete && img.naturalWidth > 0;
-          const borderRadius = (props.borderRadius || 0) * scale;
-
-          // Frame border properties
-          const hasFrameBorder =
-            props.frameBorder && (props.frameBorderWidth || 0) > 0;
-          const frameBorderWidth = (props.frameBorderWidth || 0) * scale;
-          const frameBorderColor = props.frameBorderColor || "#1a1a1a";
-          const fbRadiusTL = hasFrameBorder
-            ? (props.frameBorderRadiusTL ?? (props.borderRadius || 0)) * scale
-            : borderRadius;
-          const fbRadiusTR = hasFrameBorder
-            ? (props.frameBorderRadiusTR ?? (props.borderRadius || 0)) * scale
-            : borderRadius;
-          const fbRadiusBL = hasFrameBorder
-            ? (props.frameBorderRadiusBL ?? (props.borderRadius || 0)) * scale
-            : borderRadius;
-          const fbRadiusBR = hasFrameBorder
-            ? (props.frameBorderRadiusBR ?? (props.borderRadius || 0)) * scale
-            : borderRadius;
-
-          // Total size matches element dimensions (border-box: border is inside)
-          const totalWidth = pos.width;
-          const totalHeight = pos.height;
-
-          // Inner content area (image) is smaller when frame border is present
-          const innerWidth = hasFrameBorder
-            ? pos.width - frameBorderWidth * 2
-            : pos.width;
-          const innerHeight = hasFrameBorder
-            ? pos.height - frameBorderWidth * 2
-            : pos.height;
-
-          const outerGroup = new Konva.Group({
-            x: pos.x + pos.width / 2,
-            y: pos.y + pos.height / 2,
-            rotation: layerConfig.rotation,
-            opacity: layerConfig.opacity,
-          });
-
-          // Helper to draw a rounded rect path with per-corner radii
-          const drawRoundedRect = (
-            ctx: any,
-            x: number,
-            y: number,
-            w: number,
-            h: number,
-            rTL: number,
-            rTR: number,
-            rBR: number,
-            rBL: number,
-          ) => {
-            ctx.beginPath();
-            ctx.moveTo(x + rTL, y);
-            ctx.lineTo(x + w - rTR, y);
-            ctx.arcTo(x + w, y, x + w, y + rTR, rTR);
-            ctx.lineTo(x + w, y + h - rBR);
-            ctx.arcTo(x + w, y + h, x + w - rBR, y + h, rBR);
-            ctx.lineTo(x + rBL, y + h);
-            ctx.arcTo(x, y + h, x, y + h - rBL, rBL);
-            ctx.lineTo(x, y + rTL);
-            ctx.arcTo(x, y, x + rTL, y, rTL);
-            ctx.closePath();
-          };
-
-          if (props.shadow) {
-            const shadowOffsetX = (props.shadowOffsetX || 0) * scale;
-            const shadowOffsetY = (props.shadowOffsetY || 4) * scale;
-            const shadowBlur = Math.max((props.shadowBlur || 20) * scale, 1);
-
-            let shadowOpacity = 0.25;
-            if (props.shadowColor) {
-              const rgbaMatch = props.shadowColor.match(
-                /rgba?\([^)]+,\s*([\d.]+)\s*\)/,
-              );
-              if (rgbaMatch) {
-                shadowOpacity = parseFloat(rgbaMatch[1]);
-              }
-            }
-
-            const blurPadding = shadowBlur * 3;
-
-            const shadowRect = new Konva.Rect({
-              x: -totalWidth / 2 + shadowOffsetX,
-              y: -totalHeight / 2 + shadowOffsetY,
-              width: totalWidth,
-              height: totalHeight,
-              fill: "black",
-              cornerRadius: hasFrameBorder
-                ? [fbRadiusTL, fbRadiusTR, fbRadiusBR, fbRadiusBL]
-                : borderRadius,
-              opacity: shadowOpacity,
-            });
-            shadowRect.filters([Konva.Filters.Blur]);
-            shadowRect.blurRadius(shadowBlur);
-
-            shadowRect.cache({
-              x: -blurPadding,
-              y: -blurPadding,
-              width: totalWidth + blurPadding * 2,
-              height: totalHeight + blurPadding * 2,
-            });
-            outerGroup.add(shadowRect);
-          }
-
-          // Inner radius = outer radius minus border width
-          const innerTL = hasFrameBorder
-            ? Math.max(0, fbRadiusTL - frameBorderWidth)
-            : borderRadius;
-          const innerTR = hasFrameBorder
-            ? Math.max(0, fbRadiusTR - frameBorderWidth)
-            : borderRadius;
-          const innerBR = hasFrameBorder
-            ? Math.max(0, fbRadiusBR - frameBorderWidth)
-            : borderRadius;
-          const innerBL = hasFrameBorder
-            ? Math.max(0, fbRadiusBL - frameBorderWidth)
-            : borderRadius;
-
-          if (hasValidImage) {
-            const imageGroup = new Konva.Group({
-              x: -innerWidth / 2,
-              y: -innerHeight / 2,
-            });
-
-            imageGroup.clipFunc((ctx) => {
-              drawRoundedRect(
-                ctx,
-                0,
-                0,
-                innerWidth,
-                innerHeight,
-                innerTL,
-                innerTR,
-                innerBR,
-                innerBL,
-              );
-            });
-
-            const imgNaturalWidth = img.naturalWidth;
-            const imgNaturalHeight = img.naturalHeight;
-            const containerWidth = innerWidth;
-            const containerHeight = innerHeight;
-
-            const imgAspect = imgNaturalWidth / imgNaturalHeight;
-            const containerAspect = containerWidth / containerHeight;
-
-            let drawWidth: number;
-            let drawHeight: number;
-            let drawX: number;
-            let drawY: number;
-
-            if (imgAspect > containerAspect) {
-              drawHeight = containerHeight;
-              drawWidth = containerHeight * imgAspect;
-              drawX = (containerWidth - drawWidth) / 2;
-              drawY = 0;
-            } else {
-              drawWidth = containerWidth;
-              drawHeight = containerWidth / imgAspect;
-              drawX = 0;
-              drawY = (containerHeight - drawHeight) / 2;
-            }
-
-            imageGroup.add(
-              new Konva.Image({
-                x: drawX,
-                y: drawY,
-                width: drawWidth,
-                height: drawHeight,
-                image: img,
-              }),
-            );
-            outerGroup.add(imageGroup);
-          } else {
-            outerGroup.add(
-              new Konva.Rect({
-                x: -innerWidth / 2,
-                y: -innerHeight / 2,
-                width: innerWidth,
-                height: innerHeight,
-                fill: "#e2e8f0",
-                cornerRadius: hasFrameBorder
-                  ? [innerTL, innerTR, innerBR, innerBL]
-                  : borderRadius,
-              }),
-            );
-          }
-
-          // Frame border drawn as a ring shape on top (outer CW + inner CCW cutout)
-          if (hasFrameBorder) {
-            const borderRingShape = new Konva.Shape({
-              sceneFunc: (ctx, shape) => {
-                const ox = -totalWidth / 2, oy = -totalHeight / 2;
-                const ix = -innerWidth / 2, iy = -innerHeight / 2;
-
-                ctx.beginPath();
-
-                // Outer rounded rect (clockwise)
-                ctx.moveTo(ox + fbRadiusTL, oy);
-                ctx.lineTo(ox + totalWidth - fbRadiusTR, oy);
-                ctx.arcTo(ox + totalWidth, oy, ox + totalWidth, oy + fbRadiusTR, fbRadiusTR);
-                ctx.lineTo(ox + totalWidth, oy + totalHeight - fbRadiusBR);
-                ctx.arcTo(ox + totalWidth, oy + totalHeight, ox + totalWidth - fbRadiusBR, oy + totalHeight, fbRadiusBR);
-                ctx.lineTo(ox + fbRadiusBL, oy + totalHeight);
-                ctx.arcTo(ox, oy + totalHeight, ox, oy + totalHeight - fbRadiusBL, fbRadiusBL);
-                ctx.lineTo(ox, oy + fbRadiusTL);
-                ctx.arcTo(ox, oy, ox + fbRadiusTL, oy, fbRadiusTL);
-                ctx.closePath();
-
-                // Inner rounded rect (counter-clockwise for cutout)
-                ctx.moveTo(ix + innerTL, iy);
-                ctx.arcTo(ix, iy, ix, iy + innerTL, innerTL);
-                ctx.lineTo(ix, iy + innerHeight - innerBL);
-                ctx.arcTo(ix, iy + innerHeight, ix + innerBL, iy + innerHeight, innerBL);
-                ctx.lineTo(ix + innerWidth - innerBR, iy + innerHeight);
-                ctx.arcTo(ix + innerWidth, iy + innerHeight, ix + innerWidth, iy + innerHeight - innerBR, innerBR);
-                ctx.lineTo(ix + innerWidth, iy + innerTR);
-                ctx.arcTo(ix + innerWidth, iy, ix + innerWidth - innerTR, iy, innerTR);
-                ctx.closePath();
-
-                ctx.fillStrokeShape(shape);
-              },
-              fill: frameBorderColor,
-            });
-            outerGroup.add(borderRingShape);
-          }
-
-          layer.add(outerGroup);
+        switch (layerConfig.type) {
+          case "shape":
+            renderShapeToKonva(layer, layerConfig, canvas, exportSize);
+            break;
+          case "gradient":
+            renderGradientToKonva(layer, layerConfig, exportSize);
+            break;
+          case "text":
+            renderTextToKonva(layer, layerConfig, canvas, exportSize);
+            break;
+          case "image":
+          case "screenshot":
+            renderImageToKonva(layer, layerConfig, canvas, exportSize);
+            break;
         }
       }
 
@@ -804,7 +794,7 @@ export default function ExportPage() {
         properties: {
           ...props,
           fontSize: props.fontSize
-            ? Math.round(props.fontSize * Math.min(scaleX, scaleY))
+            ? Math.round(props.fontSize * scaleX)
             : props.fontSize,
           offsetX: props.offsetX
             ? Math.round(props.offsetX * scaleX)

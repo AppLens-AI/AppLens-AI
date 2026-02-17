@@ -15,6 +15,7 @@ import {
   normalizeLayerProperties,
   TemplateSlideProps,
   gradientToCSS,
+  TEXT_RENDER_PADDING,
 } from "@/lib/layerUtils";
 import { ImagePlus, Smartphone, Loader2 } from "lucide-react";
 
@@ -421,7 +422,7 @@ export default function TemplateSlide({
               textAlign: (props.align || "left") as "left" | "center" | "right",
               lineHeight: props.lineHeight || 1.5,
               whiteSpace: "pre-wrap",
-              padding: "4px",
+              padding: `${TEXT_RENDER_PADDING * scaleFactor}px`,
               cursor: layer.locked || !isActive ? "default" : "move",
             }}
             className={`transition-all duration-150 ${
