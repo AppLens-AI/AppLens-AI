@@ -78,6 +78,52 @@ export function gradientLinearPoints(
   };
 }
 
+// ── Border-radius clamping ───────────────────────────────────────────────────
+
+/**
+ * Clamp four corner radii so they never exceed the rectangle's dimensions.
+ *
+ * This replicates the CSS border-radius clamping algorithm (CSS Backgrounds
+ * Level 3, §5.5): when the sum of adjacent radii exceeds a side's length all
+ * radii are scaled down proportionally so the arcs fit.
+ *
+ * Works for both uniform and per-corner radii and is safe to call with any
+ * non-negative numbers — it will never enlarge a radius.
+ */
+export function clampBorderRadii(
+  w: number,
+  h: number,
+  rTL: number,
+  rTR: number,
+  rBR: number,
+  rBL: number,
+): [tl: number, tr: number, br: number, bl: number] {
+  // Avoid division-by-zero; if the rect is degenerate all radii collapse to 0.
+  if (w <= 0 || h <= 0) return [0, 0, 0, 0];
+
+  // CSS spec: f = min(L_side / (r_a + r_b)) for every side, capped at 1.
+  const f = Math.min(
+    1,
+    w / Math.max(rTL + rTR, 1e-6),
+    w / Math.max(rBL + rBR, 1e-6),
+    h / Math.max(rTL + rBL, 1e-6),
+    h / Math.max(rTR + rBR, 1e-6),
+  );
+
+  return [rTL * f, rTR * f, rBR * f, rBL * f];
+}
+
+/**
+ * Convenience overload: clamp a single uniform radius for all four corners.
+ */
+export function clampUniformRadius(
+  w: number,
+  h: number,
+  r: number,
+): number {
+  return Math.min(r, w / 2, h / 2);
+}
+
 // ── Existing code ────────────────────────────────────────────────────────────
 
 export interface CanvasData {

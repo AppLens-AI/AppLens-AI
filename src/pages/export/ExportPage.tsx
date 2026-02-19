@@ -23,6 +23,8 @@ import {
   gradientToKonvaStops,
   gradientLinearPoints,
   calculateExportLayerPosition,
+  clampBorderRadii,
+  clampUniformRadius,
   TEXT_RENDER_PADDING,
 } from "@/lib/layerUtils";
 import JSZip from "jszip";
@@ -238,6 +240,11 @@ export default function ExportPage() {
         }),
       );
     } else {
+      const shapeRadius = clampUniformRadius(
+        pos.width,
+        pos.height,
+        (props.cornerRadius || 0) * scale,
+      );
       konvaLayer.add(
         new Konva.Rect({
           x: pos.x + pos.width / 2,
@@ -247,7 +254,7 @@ export default function ExportPage() {
           fill: props.fill || "transparent",
           stroke: props.stroke || undefined,
           strokeWidth: props.stroke ? (props.strokeWidth || 0) * scale : 0,
-          cornerRadius: (props.cornerRadius || 0) * scale,
+          cornerRadius: shapeRadius,
           opacity: layerConfig.opacity,
           rotation: layerConfig.rotation,
           offsetX: pos.width / 2,
@@ -361,16 +368,19 @@ export default function ExportPage() {
     rBR: number,
     rBL: number,
   ) => {
+    // Clamp radii so arcs never overlap — mirrors CSS border-radius behaviour.
+    const [tl, tr, br, bl] = clampBorderRadii(w, h, rTL, rTR, rBR, rBL);
+
     ctx.beginPath();
-    ctx.moveTo(x + rTL, y);
-    ctx.lineTo(x + w - rTR, y);
-    ctx.arcTo(x + w, y, x + w, y + rTR, rTR);
-    ctx.lineTo(x + w, y + h - rBR);
-    ctx.arcTo(x + w, y + h, x + w - rBR, y + h, rBR);
-    ctx.lineTo(x + rBL, y + h);
-    ctx.arcTo(x, y + h, x, y + h - rBL, rBL);
-    ctx.lineTo(x, y + rTL);
-    ctx.arcTo(x, y, x + rTL, y, rTL);
+    ctx.moveTo(x + tl, y);
+    ctx.lineTo(x + w - tr, y);
+    ctx.arcTo(x + w, y, x + w, y + tr, tr);
+    ctx.lineTo(x + w, y + h - br);
+    ctx.arcTo(x + w, y + h, x + w - br, y + h, br);
+    ctx.lineTo(x + bl, y + h);
+    ctx.arcTo(x, y + h, x, y + h - bl, bl);
+    ctx.lineTo(x, y + tl);
+    ctx.arcTo(x, y, x + tl, y, tl);
     ctx.closePath();
   };
 
@@ -396,33 +406,47 @@ export default function ExportPage() {
 
     const img = loadedImages.get(props.src);
     const hasValidImage = img && img.complete && img.naturalWidth > 0;
-    const borderRadius = (props.borderRadius || 0) * scale;
+    const rawBorderRadius = (props.borderRadius || 0) * scale;
 
     const hasFrameBorder =
       props.frameBorder && (props.frameBorderWidth || 0) > 0;
     const frameBorderWidth = (props.frameBorderWidth || 0) * scale;
     const frameBorderColor = props.frameBorderColor || "#1a1a1a";
-    const fbRadiusTL = hasFrameBorder
-      ? (props.frameBorderRadiusTL ?? (props.borderRadius || 0)) * scale
-      : borderRadius;
-    const fbRadiusTR = hasFrameBorder
-      ? (props.frameBorderRadiusTR ?? (props.borderRadius || 0)) * scale
-      : borderRadius;
-    const fbRadiusBL = hasFrameBorder
-      ? (props.frameBorderRadiusBL ?? (props.borderRadius || 0)) * scale
-      : borderRadius;
-    const fbRadiusBR = hasFrameBorder
-      ? (props.frameBorderRadiusBR ?? (props.borderRadius || 0)) * scale
-      : borderRadius;
 
     const totalWidth = pos.width;
     const totalHeight = pos.height;
+
+    const rawTL = hasFrameBorder
+      ? (props.frameBorderRadiusTL ?? (props.borderRadius || 0)) * scale
+      : rawBorderRadius;
+    const rawTR = hasFrameBorder
+      ? (props.frameBorderRadiusTR ?? (props.borderRadius || 0)) * scale
+      : rawBorderRadius;
+    const rawBR = hasFrameBorder
+      ? (props.frameBorderRadiusBR ?? (props.borderRadius || 0)) * scale
+      : rawBorderRadius;
+    const rawBL = hasFrameBorder
+      ? (props.frameBorderRadiusBL ?? (props.borderRadius || 0)) * scale
+      : rawBorderRadius;
+    const [fbRadiusTL, fbRadiusTR, fbRadiusBR, fbRadiusBL] = clampBorderRadii(
+      totalWidth,
+      totalHeight,
+      rawTL,
+      rawTR,
+      rawBR,
+      rawBL,
+    );
+    const borderRadius = clampUniformRadius(
+      totalWidth,
+      totalHeight,
+      rawBorderRadius,
+    );
     const innerWidth = hasFrameBorder
-      ? pos.width - frameBorderWidth * 2
-      : pos.width;
+      ? totalWidth - frameBorderWidth * 2
+      : totalWidth;
     const innerHeight = hasFrameBorder
-      ? pos.height - frameBorderWidth * 2
-      : pos.height;
+      ? totalHeight - frameBorderWidth * 2
+      : totalHeight;
 
     const outerGroup = new Konva.Group({
       x: pos.x + pos.width / 2,
@@ -465,19 +489,22 @@ export default function ExportPage() {
       outerGroup.add(shadowRect);
     }
 
-    // Inner corner radii
-    const innerTL = hasFrameBorder
-      ? Math.max(0, fbRadiusTL - frameBorderWidth)
-      : borderRadius;
-    const innerTR = hasFrameBorder
-      ? Math.max(0, fbRadiusTR - frameBorderWidth)
-      : borderRadius;
-    const innerBR = hasFrameBorder
-      ? Math.max(0, fbRadiusBR - frameBorderWidth)
-      : borderRadius;
-    const innerBL = hasFrameBorder
-      ? Math.max(0, fbRadiusBL - frameBorderWidth)
-      : borderRadius;
+    const [innerTL, innerTR, innerBR, innerBL] = clampBorderRadii(
+      innerWidth,
+      innerHeight,
+      hasFrameBorder
+        ? Math.max(0, fbRadiusTL - frameBorderWidth)
+        : borderRadius,
+      hasFrameBorder
+        ? Math.max(0, fbRadiusTR - frameBorderWidth)
+        : borderRadius,
+      hasFrameBorder
+        ? Math.max(0, fbRadiusBR - frameBorderWidth)
+        : borderRadius,
+      hasFrameBorder
+        ? Math.max(0, fbRadiusBL - frameBorderWidth)
+        : borderRadius,
+    );
 
     if (hasValidImage) {
       const cw = Math.ceil(innerWidth);
