@@ -660,11 +660,11 @@ export const useEditorStore = create<EditorState>((set, get) => ({
           height: targetExportSize.height,
           backgroundColor: slide.canvas.backgroundColor,
         },
-        layers: slide.layers.map((layer) => {
+        layers: slide.layers.map((layer, layerIdx) => {
           const props = layer.properties as any;
           return {
             ...layer,
-            id: `${layer.id.split('-').slice(0, -1).join('-')}-${i}`,
+            id: `layer-${targetKey}-${i}-${layerIdx}-${Date.now()}`,
             x: Math.round(layer.x * scaleX),
             y: Math.round(layer.y * scaleY),
             // Use uniform scale for dimensions to preserve aspect ratio
