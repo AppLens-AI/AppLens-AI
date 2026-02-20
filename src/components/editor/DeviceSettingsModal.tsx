@@ -39,7 +39,7 @@ const PRESET_DEVICES: ExportSize[] = [
   { name: 'iPad 12.9"', platform: "ios", width: 2048, height: 2732 },
   { name: 'iPad 11"', platform: "ios", width: 1668, height: 2388 },
   { name: "Android Phone", platform: "android", width: 1080, height: 1920 },
-  { name: "Android Tablet 10", platform: "android", width: 1920, height: 1200 },
+  { name: "Android Tablet 10", platform: "android", width: 1200, height: 1920 },
   { name: "Android Tablet 7", platform: "android", width: 1280, height: 800 },
 ];
 

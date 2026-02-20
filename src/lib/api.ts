@@ -190,5 +190,9 @@ export const adminApi = {
 export const getProxyImageUrl = (originalUrl: string): string => {
   if (!originalUrl) return "";
   const baseUrl = import.meta.env.VITE_API_URL || "/api";
+  // If the image is already served from our backend, return it directly
+  if (originalUrl.startsWith(baseUrl) || originalUrl.startsWith("/api/uploads")) {
+    return originalUrl;
+  }
   return `${baseUrl}/proxy-image?url=${encodeURIComponent(originalUrl)}`;
 };
